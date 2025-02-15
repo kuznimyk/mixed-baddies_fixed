@@ -1,10 +1,11 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template, redirect, url_for, session, flash
 from flask_pymongo import PyMongo
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from bson.objectid import ObjectId
 import datetime
+from functools import wraps
 
 app = Flask(__name__)
 CORS(app)
@@ -12,17 +13,96 @@ CORS(app)
 # Configure MongoDB
 app.config["MONGO_URI"] = "mongodb://localhost:27017/campusdash"
 app.config["JWT_SECRET_KEY"] = "supersecretkey"  # Change this in production
+app.config["SECRET_KEY"] = "anothersecretkey"  # For session management
 mongo = PyMongo(app)
 
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
 
+# Login required decorator
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return redirect(url_for('login_page'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 # Home Route
 @app.route("/")
 def home():
-    return jsonify({"message": "Welcome to CampusDash API"}), 200
+    return render_template('index.html')
 
-# User Signup
+# Signup page route
+@app.route("/signup", methods=["GET"])
+def signup_page():
+    return render_template('signup.html')
+
+# Login page route
+@app.route("/login", methods=["GET"])
+def login_page():
+    return render_template('login.html')
+
+# Dashboard route (protected)
+@app.route("/dashboard")
+@login_required
+def dashboard():
+    user_id = session.get('user_id')
+    user = mongo.db.users.find_one({"_id": ObjectId(user_id)})
+    return render_template('dashboard.html', user=user)
+
+# Process signup form
+@app.route("/process_signup", methods=["POST"])
+def process_signup():
+    # Check if email already exists
+    existing_user = mongo.db.users.find_one({"email": request.form.get("email")})
+    if existing_user:
+        flash("Email already registered")
+        return redirect(url_for('signup_page'))
+    
+    # Check if student ID already exists
+    existing_student = mongo.db.users.find_one({"student_id": request.form.get("student_id")})
+    if existing_student:
+        flash("Student ID already registered")
+        return redirect(url_for('signup_page'))
+    
+    # Hash password
+    hashed_pw = bcrypt.generate_password_hash(request.form.get("password")).decode('utf-8')
+    
+    # Insert new user
+    user_id = mongo.db.users.insert_one({
+        "name": request.form.get("name"),
+        "student_id": request.form.get("student_id"),
+        "email": request.form.get("email"),
+        "password": hashed_pw,
+        "payment_info": {},
+        "degree_type": request.form.get("degree_type", "Undeclared"),
+        "role": "user"
+    }).inserted_id
+    
+    flash("Registration successful! Please log in.")
+    return redirect(url_for('login_page'))
+
+# Process login form
+@app.route("/process_login", methods=["POST"])
+def process_login():
+    user = mongo.db.users.find_one({"email": request.form.get("email")})
+    
+    if user and bcrypt.check_password_hash(user["password"], request.form.get("password")):
+        session['user_id'] = str(user["_id"])
+        session['user_name'] = user["name"]
+        return redirect(url_for('dashboard'))
+    
+    flash("Invalid email or password")
+    return redirect(url_for('login_page'))
+
+# Logout route
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for('home'))
+
+# User Signup API (original)
 @app.route("/signup", methods=["POST"])
 def signup():
     data = request.json
@@ -38,7 +118,7 @@ def signup():
     }).inserted_id
     return jsonify({"message": "User registered successfully", "user_id": str(user_id)}), 201
 
-# User Login
+# User Login API (original)
 @app.route("/login", methods=["POST"])
 def login():
     data = request.json
@@ -49,7 +129,7 @@ def login():
         return jsonify({"message": "Login successful", "token": access_token}), 200
     return jsonify({"error": "Invalid email or password"}), 401
 
-# Post a Job
+# Keep the rest of your routes as they were...
 @app.route("/jobs", methods=["POST"])
 @jwt_required()
 def post_job():
@@ -66,7 +146,6 @@ def post_job():
     }).inserted_id
     return jsonify({"message": "Job posted", "job_id": str(job_id)}), 201
 
-# Accept a Job
 @app.route("/jobs/<string:job_id>/accept", methods=["PUT"])
 @jwt_required()
 def accept_job(job_id):
@@ -80,7 +159,6 @@ def accept_job(job_id):
         return jsonify({"error": "Job not found"}), 404
     return jsonify({"message": "Job accepted", "job_id": job_id}), 200
 
-# Complete an Order
 @app.route("/orders/complete", methods=["POST"])
 @jwt_required()
 def complete_order():
