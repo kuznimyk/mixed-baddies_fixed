@@ -57,8 +57,6 @@ def home():
 # Authentication routes
 @app.route("/signup", methods=["GET", "POST"])
 def signup_page():
-    if 'user_id' in session:
-        return redirect(url_for('dashboard'))
         
     if request.method == "GET":
         return render_template('signup.html')
@@ -102,8 +100,6 @@ def signup_page():
 
 @app.route("/login", methods=["GET", "POST"])
 def login_page():
-    if 'user_id' in session:
-        return redirect(url_for('dashboard'))
         
     if request.method == "GET":
         return render_template('login.html')
