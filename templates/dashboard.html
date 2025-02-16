@@ -1,0 +1,368 @@
+{% extends "base.html" %}
+{% block title %}Dashboard - CampusConnect{% endblock %}
+
+{% block content %}
+<div class="container mt-4 mb-5 pb-5">
+    <div class="row">
+        <!-- User Profile Card -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h2 class="text-center mb-3">My Profile</h2>
+                    <div class="text-center mb-4">
+                        <img src="https://via.placeholder.com/150" class="rounded-circle" alt="Profile Picture">
+                    </div>
+                    <div class="mb-3">
+                        <h5>{{ user.name }}</h5>
+                        <p class="text-muted">Student ID: {{ user.student_id }}</p>
+                        <p class="text-muted">{{ user.email }}</p>
+                        <p>Degree: {{ user.degree_type }} {% if user.degree %}in {{ user.degree }}{% endif %}</p>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <a href="#" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#editProfileModal">Edit Profile</a>
+                        <a href="#" class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#paymentInfoModal">Update Payment Info</a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Balance Card -->
+            <div class="card shadow mt-4">
+                <div class="card-body">
+                    <h4 class="card-title">My Balance</h4>
+                    <h2 class="text-success">${{ user.balance|default(0.00)|round(2) }}</h2>
+                    <div class="d-grid gap-2 mt-3">
+                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addFundsModal">Add Funds</button>
+                        <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#withdrawFundsModal">Withdraw</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Dashboard Content -->
+        <div class="col-md-8">
+            <!-- Active Jobs -->
+            <div class="card shadow mb-4">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">My Active Jobs</h4>
+                </div>
+                <div class="card-body">
+                    <ul class="nav nav-tabs" id="jobTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="posted-tab" data-bs-toggle="tab" data-bs-target="#posted" type="button" role="tab">Jobs I Posted</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="accepted-tab" data-bs-toggle="tab" data-bs-target="#accepted" type="button" role="tab">Jobs I Accepted</button>
+                        </li>
+                    </ul>
+                    <div class="tab-content pt-3" id="jobTabsContent">
+                        <!-- Jobs I Posted Tab -->
+                        <div class="tab-pane fade show active" id="posted" role="tabpanel">
+                            <div class="list-group">
+                                <!-- This would be populated from backend -->
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h5 class="mb-1">Pick up my textbook</h5>
+                                        <span class="badge bg-success">$15.00</span>
+                                    </div>
+                                    <p class="mb-1">Library pickup - Education Building</p>
+                                    <small class="text-muted">Posted yesterday · In Progress</small>
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h5 class="mb-1">Coffee delivery</h5>
+                                        <span class="badge bg-success">$5.00</span>
+                                    </div>
+                                    <p class="mb-1">Starbucks to Science Building</p>
+                                    <small class="text-muted">Posted 3 days ago · Waiting for acceptor</small>
+                                </a>
+                            </div>
+                            <div class="d-grid mt-3">
+                                <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#postJobModal">Post New Job</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Jobs I Accepted Tab -->
+                        <div class="tab-pane fade" id="accepted" role="tabpanel">
+                            <div class="list-group">
+                                <!-- This would be populated from backend -->
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between">
+                                        <h5 class="mb-1">Notes for BIO 101</h5>
+                                        <span class="badge bg-success">$20.00</span>
+                                    </div>
+                                    <p class="mb-1">Share class notes for last week</p>
+                                    <small class="text-muted">Accepted 2 hours ago · Due tomorrow</small>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Completed Jobs -->
+            <div class="card shadow">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">Completed Jobs</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Job</th>
+                                    <th>Date</th>
+                                    <th>Role</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- This would be populated from backend -->
+                                <tr>
+                                    <td>Tutoring session</td>
+                                    <td>Feb 10, 2025</td>
+                                    <td>Provider</td>
+                                    <td class="text-success">+$35.00</td>
+                                </tr>
+                                <tr>
+                                    <td>Lunch delivery</td>
+                                    <td>Feb 5, 2025</td>
+                                    <td>Requester</td>
+                                    <td class="text-danger">-$12.50</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="editName" class="form-label">Name</label>
+                        <input type="text" class="form-control" id="editName" value="{{ user.name }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editEmail" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="editEmail" value="{{ user.email }}">
+                    </div>
+                    <div class="mb-3">
+                        <label for="editDegreeType" class="form-label">Degree Type</label>
+                        <select class="form-select" id="editDegreeType">
+                            <option value="Undeclared" {% if user.degree_type == 'Undeclared' %}selected{% endif %}>Undeclared</option>
+                            <option value="Associate" {% if user.degree_type == 'Associate' %}selected{% endif %}>Associate</option>
+                            <option value="Bachelor" {% if user.degree_type == 'Bachelor' %}selected{% endif %}>Bachelor</option>
+                            <option value="Master" {% if user.degree_type == 'Master' %}selected{% endif %}>Master</option>
+                            <option value="Doctorate" {% if user.degree_type == 'Doctorate' %}selected{% endif %}>Doctorate</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editDegree" class="form-label">Degree/Major</label>
+                        <input type="text" class="form-control" id="editDegree" value="{{ user.degree|default('') }}">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success">Save Changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment Info Modal -->
+<div class="modal fade" id="paymentInfoModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Update Payment Information</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="cardName" class="form-label">Name on Card</label>
+                        <input type="text" class="form-control" id="cardName">
+                    </div>
+                    <div class="mb-3">
+                        <label for="cardNumber" class="form-label">Card Number</label>
+                        <input type="text" class="form-control" id="cardNumber" placeholder="XXXX XXXX XXXX XXXX">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="expiryDate" class="form-label">Expiry Date</label>
+                            <input type="text" class="form-control" id="expiryDate" placeholder="MM/YY">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="cvv" class="form-label">CVV</label>
+                            <input type="text" class="form-control" id="cvv" placeholder="123">
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success">Save Payment Info</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Funds Modal -->
+<div class="modal fade" id="addFundsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Funds to Your Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="addAmount" class="form-label">Amount to Add ($)</label>
+                        <input type="number" class="form-control" id="addAmount" min="5" step="1">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Payment Method</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="paymentMethod" id="savedCard" checked>
+                            <label class="form-check-label" for="savedCard">
+                                Use saved card (****1234)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="paymentMethod" id="newCard">
+                            <label class="form-check-label" for="newCard">
+                                Use a different card
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div id="newCardFields" class="d-none">
+                        <!-- New card fields would go here, similar to payment info modal -->
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success">Add Funds</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Withdraw Funds Modal -->
+<div class="modal fade" id="withdrawFundsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Withdraw Funds</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="withdrawAmount" class="form-label">Amount to Withdraw ($)</label>
+                        <input type="number" class="form-control" id="withdrawAmount" min="5" max="{{ user.balance|default(0) }}" step="1">
+                        <small class="text-muted">Available balance: ${{ user.balance|default(0.00)|round(2) }}</small>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="withdrawMethod" class="form-label">Withdrawal Method</label>
+                        <select class="form-select" id="withdrawMethod">
+                            <option value="bank">Bank Transfer</option>
+                            <option value="card">Credit Card Refund</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success">Withdraw Funds</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Post Job Modal -->
+<div class="modal fade" id="postJobModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Post a New Job</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label for="jobTitle" class="form-label">Job Title</label>
+                        <input type="text" class="form-control" id="jobTitle" placeholder="e.g., Coffee Delivery, Note Sharing">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="jobDetails" class="form-label">Job Details</label>
+                        <textarea class="form-control" id="jobDetails" rows="4" placeholder="Describe what you need help with..."></textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="jobPrice" class="form-label">Price ($)</label>
+                            <input type="number" class="form-control" id="jobPrice" min="1" step="0.5">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="jobType" class="form-label">Job Type</label>
+                            <select class="form-select" id="jobType">
+                                <option value="errand">Errand</option>
+                                <option value="delivery">Food/Item Delivery</option>
+                                <option value="tutoring">Tutoring/Academic Help</option>
+                                <option value="technical">Tech Support</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="meetPlace" class="form-label">Meeting Type</label>
+                            <select class="form-select" id="meetPlace">
+                                <option value="IN PERSON">In Person</option>
+                                <option value="ONLINE">Online</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="meetTime" class="form-label">Meet-up Date/Time</label>
+                            <input type="datetime-local" class="form-control" id="meetTime">
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="meetLocation" class="form-label">Meeting Location (if in-person)</label>
+                        <input type="text" class="form-control" id="meetLocation" placeholder="e.g., Library, Student Union">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success">Post Job</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS Bundle with Popper -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+
+{% endblock %}
