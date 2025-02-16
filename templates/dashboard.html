@@ -4,75 +4,42 @@
 {% block content %}
 <div class="container mt-4 mb-5 pb-5">
     <div class="row">
-<!-- profile card in dashboard -->
-<div class="card shadow">
-    <div class="card-body">
-        <h2 class="text-center mb-3">My Profile</h2>
-        <div class="text-center mb-4">
-            <div class="position-relative d-inline-block">
-                <img src="{{ user.profile_image|default('/img/Profile/default.jpg') }}" 
-                     class="rounded-circle" 
-                     alt="Profile Picture" 
-                     style="width: 150px; height: 150px; object-fit: cover;">
-                <button class="btn btn-sm btn-success position-absolute bottom-0 end-0"
-                        data-bs-toggle="modal" 
-                        data-bs-target="#updateProfileImageModal">
-                    <i class="bi bi-camera"></i>
-                </button>
-            </div>
-        </div>
-        <div class="mb-3">
-            <h5>{{ user.name }}</h5>
-            <p class="text-muted">Student ID: {{ user.student_id }}</p>
-            <p class="text-muted">{{ user.email }}</p>
-            <p>Degree: {{ user.degree_type }} {% if user.degree %}in {{ user.degree }}{% endif %}</p>
-        </div>
-        <div class="d-grid gap-2">
-            <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#editProfileModal">
-                Edit Profile
-            </button>
-            <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#paymentInfoModal">
-                Update Payment Info
-            </button>
-            <a href="{{ url_for('logout') }}" class="btn btn-outline-success">Logout</a>
-        </div>
-    </div>
-</div>
-
-<!-- Add this new modal for profile image upload -->
-<div class="modal fade" id="updateProfileImageModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Update Profile Picture</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="profileImageForm" enctype="multipart/form-data">
-                    <div class="mb-3">
-                        <label for="profileImage" class="form-label">Choose Image</label>
-                        <input type="file" class="form-control" id="profileImage" name="profile_image" 
-                               accept="image/jpeg,image/png,image/jpg">
-                        <div class="form-text">Max file size: 5MB. Supported formats: JPG, PNG</div>
+        <!-- Left Column - Profile and Balance -->
+        <div class="col-md-4">
+            <!-- Profile card -->
+            <div class="card shadow">
+                <div class="card-body">
+                    <h2 class="text-center mb-3">My Profile</h2>
+                    <div class="text-center mb-4">
+                        <div class="position-relative d-inline-block">
+                            <img src="{{ user.profile_image|default('/img/Profile/default.jpg') }}" 
+                                 class="rounded-circle" 
+                                 alt="Profile Picture" 
+                                 style="width: 150px; height: 150px; object-fit: cover;">
+                            <button class="btn btn-sm btn-success position-absolute bottom-0 end-0"
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#updateProfileImageModal">
+                                <i class="bi bi-camera"></i>
+                            </button>
+                        </div>
                     </div>
-                </form>
+                    <div class="mb-3">
+                        <h5>{{ user.name }}</h5>
+                        <p class="text-muted">Student ID: {{ user.student_id }}</p>
+                        <p class="text-muted">{{ user.email }}</p>
+                        <p>Degree: {{ user.degree_type }} {% if user.degree %}in {{ user.degree }}{% endif %}</p>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                            Edit Profile
+                        </button>
+                        <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#paymentInfoModal">
+                            Update Payment Info
+                        </button>
+                        <a href="{{ url_for('logout') }}" class="btn btn-outline-success">Logout</a>
+                    </div>
+                </div>
             </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" onclick="uploadProfileImage()">Upload</button>
-            </div>
-        </div>
-    </div>
-</div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" onclick="uploadProfileImage()">Upload</button>
-            </div>
-        </div>
-    </div>
-</div>
             
             <!-- Balance Card -->
             <div class="card shadow mt-4">
@@ -87,7 +54,7 @@
             </div>
         </div>
         
-        <!-- Main Dashboard Content -->
+        <!-- Right Column - Jobs -->
         <div class="col-md-8">
             <!-- Active Jobs -->
             <div class="card shadow mb-4">
@@ -107,7 +74,6 @@
                         <!-- Jobs I Posted Tab -->
                         <div class="tab-pane fade show active" id="posted" role="tabpanel">
                             <div class="list-group">
-                                <!-- This would be populated from backend -->
                                 <a href="#" class="list-group-item list-group-item-action">
                                     <div class="d-flex w-100 justify-content-between">
                                         <h5 class="mb-1">Pick up my textbook</h5>
@@ -133,7 +99,6 @@
                         <!-- Jobs I Accepted Tab -->
                         <div class="tab-pane fade" id="accepted" role="tabpanel">
                             <div class="list-group">
-                                <!-- This would be populated from backend -->
                                 <a href="#" class="list-group-item list-group-item-action">
                                     <div class="d-flex w-100 justify-content-between">
                                         <h5 class="mb-1">Notes for BIO 101</h5>
@@ -155,7 +120,7 @@
                 </div>
                 <div class="card-body">
                     <div class="table-responsive completed-jobs" style="max-height: 300px; overflow-y: auto;">
-                    <table class="table table-hover">
+                        <table class="table table-hover">
                             <thead>
                                 <tr>
                                     <th>Job</th>
@@ -165,26 +130,24 @@
                                 </tr>
                             </thead>
                             <tbody>
-                            <!-- This will be populated dynamically -->
-
-                            <tr>
-                                <td>Dog walking</td>
-                                <td>Jan 25, 2025</td>
-                                <td>Provider</td>
-                                <td class="text-success">+$10.00</td>
-                            </tr>
-                            <tr>
-                                <td>Assignment help</td>
-                                <td>Jan 20, 2025</td>
-                                <td>Requester</td>
-                                <td class="text-danger">-$18.00</td>
-                            </tr>
-                            <tr>
-                                <td>Package delivery</td>
-                                <td>Jan 15, 2025</td>
-                                <td>Provider</td>
-                                <td class="text-success">+$12.00</td>
-                            </tr>
+                                <tr>
+                                    <td>Dog walking</td>
+                                    <td>Jan 25, 2025</td>
+                                    <td>Provider</td>
+                                    <td class="text-success">+$10.00</td>
+                                </tr>
+                                <tr>
+                                    <td>Assignment help</td>
+                                    <td>Jan 20, 2025</td>
+                                    <td>Requester</td>
+                                    <td class="text-danger">-$18.00</td>
+                                </tr>
+                                <tr>
+                                    <td>Package delivery</td>
+                                    <td>Jan 15, 2025</td>
+                                    <td>Provider</td>
+                                    <td class="text-success">+$12.00</td>
+                                </tr>
                             </tbody>
                         </table>
                     </div>
@@ -194,189 +157,21 @@
     </div>
 </div>
 
-<!-- Modals -->
-
-<!-- Edit Profile Modal -->
-<div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Edit Profile</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <div class="mb-3">
-                        <label for="editName" class="form-label">Name</label>
-                        <input type="text" class="form-control" id="editName" value="{{ user.name }}">
-                    </div>
-                    <div class="mb-3">
-                        <label for="editEmail" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="editEmail" value="{{ user.email }}">
-                    </div>
-                    <div class="mb-3">
-                        <label for="editDegreeType" class="form-label">Degree Type</label>
-                        <select class="form-select" id="editDegreeType">
-                            <option value="Undeclared" {% if user.degree_type == 'Undeclared' %}selected{% endif %}>Undeclared</option>
-                            <option value="Associate" {% if user.degree_type == 'Associate' %}selected{% endif %}>Associate</option>
-                            <option value="Bachelor" {% if user.degree_type == 'Bachelor' %}selected{% endif %}>Bachelor</option>
-                            <option value="Master" {% if user.degree_type == 'Master' %}selected{% endif %}>Master</option>
-                            <option value="Doctorate" {% if user.degree_type == 'Doctorate' %}selected{% endif %}>Doctorate</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="editDegree" class="form-label">Degree/Major</label>
-                        <input type="text" class="form-control" id="editDegree" value="{{ user.degree|default('') }}">
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success">Save Changes</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Payment Info Modal -->
-<div class="modal fade" id="paymentInfoModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Update Payment Information</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <div class="mb-3">
-                        <label for="cardName" class="form-label">Name on Card</label>
-                        <input type="text" class="form-control" id="cardName">
-                    </div>
-                    <div class="mb-3">
-                        <label for="cardNumber" class="form-label">Card Number</label>
-                        <input type="text" class="form-control" id="cardNumber" placeholder="XXXX XXXX XXXX XXXX">
-                    </div>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label for="expiryDate" class="form-label">Expiry Date</label>
-                            <input type="text" class="form-control" id="expiryDate" placeholder="MM/YY">
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label for="cvv" class="form-label">CVV</label>
-                            <input type="text" class="form-control" id="cvv" placeholder="123">
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success">Save Payment Info</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Add Funds Modal -->
-<div class="modal fade" id="addFundsModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Add Funds to Your Account</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <div class="mb-3">
-                        <label for="addAmount" class="form-label">Amount to Add ($)</label>
-                        <input type="number" class="form-control" id="addAmount" min="5" step="1">
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label class="form-label">Payment Method</label>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="paymentMethod" id="savedCard" checked>
-                            <label class="form-check-label" for="savedCard">
-                                Use saved card (****1234)
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" name="paymentMethod" id="newCard">
-                            <label class="form-check-label" for="newCard">
-                                Use a different card
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div id="newCardFields" class="d-none">
-                        <!-- New card fields would go here, similar to payment info modal -->
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success">Add Funds</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Withdraw Funds Modal -->
-<div class="modal fade" id="withdrawFundsModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Withdraw Funds</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <div class="mb-3">
-                        <label for="withdrawAmount" class="form-label">Amount to Withdraw ($)</label>
-                        <input type="number" class="form-control" id="withdrawAmount" min="5" max="{{ user.balance|default(0) }}" step="1">
-                        <small class="text-muted">Available balance: ${{ user.balance|default(0.00)|round(2) }}</small>
-                    </div>
-                    
-                    <div class="mb-3">
-                        <label for="withdrawMethod" class="form-label">Withdrawal Method</label>
-                        <select class="form-select" id="withdrawMethod">
-                            <option value="bank">Bank Transfer</option>
-                            <option value="card">Credit Card Refund</option>
-                        </select>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success">Withdraw Funds</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- Post Job Modal -->
-<div class="modal fade" id="postJobModal" tabindex="-1" aria-hidden="true">
+<div class="modal fade" id="postJobModal" tabindex="-1" aria-labelledby="postJobModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Post a New Job</h5>
+                <h5 class="modal-title" id="postJobModalLabel">Post a New Job</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <form id="jobPostForm">
                     <!-- Job Type Selection -->
-                <form id="jobPostForm">
-                    <!-- Job Type Selection -->
                     <div class="mb-3">
                         <label for="jobType" class="form-label">Job Type</label>
-                        <select class="form-select" id="jobType" name="job_type" required onchange="updateJobFields()">
-                            <option value="">Select a job type...</option>
-                            <option value="creative_work">Creative Work</option>
-                            <option value="academic_help">Academic Help</option>
-                            <option value="food_delivery">Food Delivery</option>
-                        </select>
-                        <label for="jobType" class="form-label">Job Type</label>
-                        <select class="form-select" id="jobType" name="job_type" required onchange="updateJobFields()">
-                            <option value="">Select a job type...</option>
+                        <select class="form-select" id="jobType" name="job_type" required>
+                            <option value="">Select a job type</option>
                             <option value="creative_work">Creative Work</option>
                             <option value="academic_help">Academic Help</option>
                             <option value="food_delivery">Food Delivery</option>
@@ -386,23 +181,31 @@
                     <!-- Creative Work Fields -->
                     <div id="creative_work_fields" class="d-none">
                         <div class="mb-3">
-                            <label for="jobTitle" class="form-label">Job Title</label>
-                            <input type="text" class="form-control" name="job_title" required placeholder="e.g., Logo Design, Poster Creation">
+                            <label for="job_title" class="form-label">Job Title</label>
+                            <input type="text" class="form-control" id="job_title" name="job_title" required>
                         </div>
                         <div class="mb-3">
-                            <label for="jobDescription" class="form-label">Job Description</label>
-                            <textarea class="form-control" name="job_description" rows="4" required placeholder="Describe the creative work you need..."></textarea>
-                        </div>
-
-                    <!-- Creative Work Fields -->
-                    <div id="creative_work_fields" class="d-none">
-                        <div class="mb-3">
-                            <label for="jobTitle" class="form-label">Job Title</label>
-                            <input type="text" class="form-control" name="job_title" required placeholder="e.g., Logo Design, Poster Creation">
+                            <label for="job_description" class="form-label">Job Description</label>
+                            <textarea class="form-control" id="job_description" name="job_description" rows="3" required></textarea>
                         </div>
                         <div class="mb-3">
-                            <label for="jobDescription" class="form-label">Job Description</label>
-                            <textarea class="form-control" name="job_description" rows="4" required placeholder="Describe the creative work you need..."></textarea>
+                            <label for="creative_fee" class="form-label">Fee ($)</label>
+                            <input type="number" class="form-control" id="creative_fee" name="fee" min="0" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="creative_meetup_type" class="form-label">Meetup Type</label>
+                            <select class="form-select" id="creative_meetup_type" name="meetup_type" onchange="toggleLocationField('creative')" required>
+                                <option value="VIRTUAL">Virtual</option>
+                                <option value="IN_PERSON">In Person</option>
+                            </select>
+                        </div>
+                        <div class="mb-3 location-field" id="creative_location_field" style="display: none;">
+                            <label for="creative_location" class="form-label">Location</label>
+                            <input type="text" class="form-control" id="creative_location" name="location">
+                        </div>
+                        <div class="mb-3">
+                            <label for="creative_datetime" class="form-label">Date/Time</label>
+                            <input type="datetime-local" class="form-control" id="creative_datetime" name="datetime" required>
                         </div>
                     </div>
 
@@ -410,105 +213,56 @@
                     <div id="academic_help_fields" class="d-none">
                         <div class="mb-3">
                             <label for="subject" class="form-label">Subject</label>
-                            <input type="text" class="form-control" name="subject" required placeholder="e.g., Calculus, Physics">
-
-                    <!-- Academic Help Fields -->
-                    <div id="academic_help_fields" class="d-none">
-                        <div class="mb-3">
-                            <label for="subject" class="form-label">Subject</label>
-                            <input type="text" class="form-control" name="subject" required placeholder="e.g., Calculus, Physics">
+                            <input type="text" class="form-control" id="subject" name="subject" required>
                         </div>
                         <div class="mb-3">
-                            <label for="problemDescription" class="form-label">Problem Description</label>
-                            <textarea class="form-control" name="problem_description" rows="4" required placeholder="Describe what you need help with..."></textarea>
+                            <label for="academic_fee" class="form-label">Fee ($)</label>
+                            <input type="number" class="form-control" id="academic_fee" name="fee" min="0" step="0.01" required>
+                        </div>
                         <div class="mb-3">
-                            <label for="problemDescription" class="form-label">Problem Description</label>
-                            <textarea class="form-control" name="problem_description" rows="4" required placeholder="Describe what you need help with..."></textarea>
+                            <label for="problem_description" class="form-label">Problem Description</label>
+                            <textarea class="form-control" id="problem_description" name="problem_description" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="academic_meetup_type" class="form-label">Meetup Type</label>
+                            <select class="form-select" id="academic_meetup_type" name="meetup_type" onchange="toggleLocationField('academic')" required>
+                                <option value="VIRTUAL">Virtual</option>
+                                <option value="IN_PERSON">In Person</option>
+                            </select>
+                        </div>
+                        <div class="mb-3 location-field" id="academic_location_field" style="display: none;">
+                            <label for="academic_location" class="form-label">Location</label>
+                            <input type="text" class="form-control" id="academic_location" name="location">
+                        </div>
+                        <div class="mb-3">
+                            <label for="academic_datetime" class="form-label">Date/Time</label>
+                            <input type="datetime-local" class="form-control" id="academic_datetime" name="datetime" required>
                         </div>
                     </div>
 
                     <!-- Food Delivery Fields -->
                     <div id="food_delivery_fields" class="d-none">
                         <div class="mb-3">
-                            <label for="restaurantName" class="form-label">Restaurant Name</label>
-                            <input type="text" class="form-control" name="restaurant_name" required placeholder="e.g., Subway, Starbucks">
-
-                    <!-- Food Delivery Fields -->
-                    <div id="food_delivery_fields" class="d-none">
-                        <div class="mb-3">
-                            <label for="restaurantName" class="form-label">Restaurant Name</label>
-                            <input type="text" class="form-control" name="restaurant_name" required placeholder="e.g., Subway, Starbucks">
+                            <label for="restaurant_name" class="form-label">Restaurant Name</label>
+                            <input type="text" class="form-control" id="restaurant_name" name="restaurant_name" required>
                         </div>
                         <div class="mb-3">
-                            <label for="orderDescription" class="form-label">Order Description</label>
-                            <textarea class="form-control" name="order_description" rows="4" required placeholder="Describe your order details..."></textarea>
+                            <label for="order_description" class="form-label">Order Description</label>
+                            <textarea class="form-control" id="order_description" name="order_description" rows="3" required></textarea>
+                        </div>
                         <div class="mb-3">
-                            <label for="orderDescription" class="form-label">Order Description</label>
-                            <textarea class="form-control" name="order_description" rows="4" required placeholder="Describe your order details..."></textarea>
+                            <label for="delivery_fee" class="form-label">Fee ($)</label>
+                            <input type="number" class="form-control" id="delivery_fee" name="fee" min="0" step="0.01" required>
                         </div>
-                    </div>
-
-                    <!-- Common Fields -->
-                    <div id="common_fields" class="d-none">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="fee" class="form-label">Fee ($)</label>
-                                <input type="number" class="form-control" name="fee" min="1" step="0.5" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="datetime" class="form-label">Date/Time Needed</label>
-                                <input type="datetime-local" class="form-control" name="datetime" required>
-                            </div>
-                        </div>
-
-                        <!-- Meetup Fields (only for creative_work and academic_help) -->
-                        <div id="meetup_fields">
-                            <div class="mb-3">
-                                <label for="meetupType" class="form-label">Meetup Type</label>
-                                <select class="form-select" name="meetup_type" required onchange="toggleLocationField()">
-                                    <option value="ONLINE">Online</option>
-                                    <option value="IN_PERSON">In Person</option>
-                                </select>
-                            </div>
-                            <div class="mb-3 d-none" id="locationField">
-                                <label for="location" class="form-label">Meeting Location</label>
-                                <input type="text" class="form-control" name="location" placeholder="e.g., Library, Student Union">
-                            </div>
-                        </div>
-
-                    <!-- Common Fields -->
-                    <div id="common_fields" class="d-none">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="fee" class="form-label">Fee ($)</label>
-                                <input type="number" class="form-control" name="fee" min="1" step="0.5" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="datetime" class="form-label">Date/Time Needed</label>
-                                <input type="datetime-local" class="form-control" name="datetime" required>
-                            </div>
-                        </div>
-
-                        <!-- Meetup Fields (only for creative_work and academic_help) -->
-                        <div id="meetup_fields">
-                            <div class="mb-3">
-                                <label for="meetupType" class="form-label">Meetup Type</label>
-                                <select class="form-select" name="meetup_type" required onchange="toggleLocationField()">
-                                    <option value="ONLINE">Online</option>
-                                    <option value="IN_PERSON">In Person</option>
-                                </select>
-                            </div>
-                            <div class="mb-3 d-none" id="locationField">
-                                <label for="location" class="form-label">Meeting Location</label>
-                                <input type="text" class="form-control" name="location" placeholder="e.g., Library, Student Union">
-                            </div>
+                        <div class="mb-3">
+                            <label for="delivery_datetime" class="form-label">Date/Time</label>
+                            <input type="datetime-local" class="form-control" id="delivery_datetime" name="datetime" required>
                         </div>
                     </div>
                 </form>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-success" onclick="submitJob()">Post Job</button>
                 <button type="button" class="btn btn-success" onclick="submitJob()">Post Job</button>
             </div>
         </div>
@@ -518,70 +272,33 @@
 <!-- Bootstrap JS Bundle with Popper -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
 
-{% endblock %}
-
-
-
 <script>
     // Function to update job fields based on selection
     function updateJobFields() {
-        console.log("updateJobFields() executed");  // Debugging
-    
         const jobType = document.getElementById('jobType').value;
-        console.log("Selected job type:", jobType);  // Debugging
-    
-        const allFields = ['creative_work_fields', 'academic_help_fields', 'food_delivery_fields'];
-    
-        // Hide all job type fields initially
-        allFields.forEach(fields => {
-            let element = document.getElementById(fields);
-            if (element) {
-                element.classList.add('d-none');
-            } else {
-                console.error("Missing field:", fields);
-            }
+        
+        // Hide all fields first
+        ['creative_work_fields', 'academic_help_fields', 'food_delivery_fields'].forEach(fields => {
+            document.getElementById(fields).classList.add('d-none');
         });
-    
-        // Show selected job type fields and common fields
+        
+        // Show selected job type fields
         if (jobType) {
-            let selectedField = document.getElementById(`${jobType}_fields`);
-            if (selectedField) {
-                selectedField.classList.remove('d-none');
-                console.log("Showing:", jobType);
-            } else {
-                console.error("Could not find field for:", jobType);
-            }
-            
-            // Show common fields for all jobs
-            document.getElementById('common_fields').classList.remove('d-none');
-            
-            // Hide meetup fields for food delivery (not needed)
-            const meetupFields = document.getElementById('meetup_fields');
-            if (jobType === 'food_delivery') {
-                meetupFields.classList.add('d-none');
-            } else {
-                meetupFields.classList.remove('d-none');
-            }
-        } else {
-            document.getElementById('common_fields').classList.add('d-none');
+            document.getElementById(`${jobType}_fields`).classList.remove('d-none');
         }
     }
     
-    // Attach event listener to job type dropdown after DOM is loaded
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log("Dashboard script loaded.");
-    
-        var jobTypeDropdown = document.getElementById('jobType');
+    // Function to toggle location field visibility
+    function toggleLocationField(prefix) {
+        const meetupType = document.getElementById(`${prefix}_meetup_type`).value;
+        const locationField = document.getElementById(`${prefix}_location_field`);
+        locationField.style.display = meetupType === 'IN_PERSON' ? 'block' : 'none';
         
-        if (jobTypeDropdown) {
-            jobTypeDropdown.addEventListener('change', function() {
-                console.log("Job type changed to:", jobTypeDropdown.value); // Debugging
-                updateJobFields();
-            });
-        } else {
-            console.error("Job type dropdown not found!");
+        // Clear location value if virtual
+        if (meetupType === 'VIRTUAL') {
+            document.getElementById(`${prefix}_location`).value = '';
         }
-    });
+    }
     
     // Function to submit the job form
     async function submitJob() {
@@ -589,44 +306,54 @@
         const formData = new FormData(form);
         const jobType = formData.get('job_type');
         
-        let requestBody = {
+        if (!jobType) {
+            showAlert('danger', 'Please select a job type');
+            return;
+        }
+        
+        let requestBody = {};
+        
+        // Get common fields based on job type
+        const prefix = jobType.replace('-', '_');
+        requestBody = {
             job_type: jobType,
-            fee: parseFloat(formData.get('fee')),
-            datetime: formData.get('datetime')
+            fee: parseFloat(document.getElementById(`${prefix}_fee`).value),
+            datetime: document.getElementById(`${prefix}_datetime`).value
         };
         
+        // Add specific fields based on job type
         switch(jobType) {
             case 'creative_work':
                 requestBody = {
                     ...requestBody,
-                    job_title: formData.get('job_title'),
-                    job_description: formData.get('job_description'),
-                    meetup_type: formData.get('meetup_type'),
-                    location: formData.get('meetup_type') === 'IN_PERSON' ? formData.get('location') : null
+                    job_title: document.getElementById('job_title').value,
+                    job_description: document.getElementById('job_description').value,
+                    meetup_type: document.getElementById('creative_meetup_type').value,
+                    location: document.getElementById('creative_meetup_type').value === 'IN_PERSON' 
+                        ? document.getElementById('creative_location').value 
+                        : null
                 };
                 break;
                 
             case 'academic_help':
                 requestBody = {
                     ...requestBody,
-                    subject: formData.get('subject'),
-                    problem_description: formData.get('problem_description'),
-                    meetup_type: formData.get('meetup_type'),
-                    location: formData.get('meetup_type') === 'IN_PERSON' ? formData.get('location') : null
+                    subject: document.getElementById('subject').value,
+                    problem_description: document.getElementById('problem_description').value,
+                    meetup_type: document.getElementById('academic_meetup_type').value,
+                    location: document.getElementById('academic_meetup_type').value === 'IN_PERSON' 
+                        ? document.getElementById('academic_location').value 
+                        : null
                 };
                 break;
                 
             case 'food_delivery':
                 requestBody = {
                     ...requestBody,
-                    restaurant_name: formData.get('restaurant_name'),
-                    order_description: formData.get('order_description')
+                    restaurant_name: document.getElementById('restaurant_name').value,
+                    order_description: document.getElementById('order_description').value
                 };
                 break;
-                
-            default:
-                showAlert('danger', 'Please select a job type');
-                return;
         }
         
         try {
@@ -653,11 +380,20 @@
         }
     }
     
-    // Function to toggle location input visibility
-    function toggleLocationField() {
-        const meetupType = document.querySelector('select[name="meetup_type"]').value;
-        const locationField = document.getElementById('locationField');
-        locationField.style.display = meetupType === 'IN_PERSON' ? 'block' : 'none';
+    // Function to display alerts
+    function showAlert(type, message) {
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.container').firstChild);
+        
+        // Auto-dismiss alert after 3 seconds
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 3000);
     }
     
     // Profile image upload functionality
@@ -686,206 +422,35 @@
         }
     }
     
-    // Function to display alerts
-    function showAlert(type, message) {
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
-        alertDiv.innerHTML = `
-            ${message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        `;
-        document.querySelector('.container').insertBefore(alertDiv, document.querySelector('.container').firstChild);
-    }
-    
-    // Initialize Bootstrap tooltips on page load
+    // Initialize page functionality when DOM is loaded
     document.addEventListener('DOMContentLoaded', function() {
+        // Initialize job type dropdown handler
+        const jobTypeDropdown = document.getElementById('jobType');
+        if (jobTypeDropdown) {
+            jobTypeDropdown.addEventListener('change', updateJobFields);
+        }
+        
+        // Initialize Bootstrap tooltips
         var tooltips = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         tooltips.map(function(tooltip) {
             return new bootstrap.Tooltip(tooltip);
         });
-    });
-    </script>
-{% endblock %} 
-
-
-
-<script>// Function to update job fields based on selection
-    function updateJobFields() {
-        const jobType = document.getElementById('jobType').value;
         
-        // Hide all specific job type fields first
-        const allFields = ['creative_work_fields', 'academic_help_fields', 'food_delivery_fields', 'common_fields'];
-        allFields.forEach(fields => {
-            document.getElementById(fields)?.classList.add('d-none');
-        });
-        
-        // If no job type is selected, return early
-        if (!jobType) {
-            return;
-        }
-        
-        // Show the selected job type fields and common fields
-        document.getElementById(`${jobType}_fields`)?.classList.remove('d-none');
-        document.getElementById('common_fields').classList.remove('d-none');
-        
-        // Show/hide meetup fields based on job type
-        const meetupFields = document.getElementById('meetup_fields');
-        if (jobType === 'food_delivery') {
-            meetupFields.classList.add('d-none');
-            // Add delivery-specific fields
-            document.getElementById('locationField').classList.remove('d-none');
-            document.querySelector('input[name="location"]').setAttribute('placeholder', 'Delivery Location (e.g., Dorm Room, Library)');
-            document.querySelector('input[name="location"]').required = true;
-        } else {
-            meetupFields.classList.remove('d-none');
-            // Reset location field
-            document.getElementById('locationField').classList.add('d-none');
-            document.querySelector('input[name="location"]').required = false;
-        }
-        
-        // Update required fields based on job type
-        updateRequiredFields(jobType);
-    }
-    
-    // Function to update required fields based on job type
-    function updateRequiredFields(jobType) {
-        // Reset all required fields first
-        const allInputs = document.querySelectorAll('#jobPostForm input, #jobPostForm textarea, #jobPostForm select');
-        allInputs.forEach(input => {
-            input.required = false;
-        });
-        
-        // Set common required fields
-        document.querySelector('input[name="fee"]').required = true;
-        document.querySelector('input[name="datetime"]').required = true;
-        
-        // Set job-type specific required fields
-        switch(jobType) {
-            case 'creative_work':
-                document.querySelector('input[name="job_title"]').required = true;
-                document.querySelector('textarea[name="job_description"]').required = true;
-                document.querySelector('select[name="meetup_type"]').required = true;
-                break;
+        // Initialize Bootstrap modals
+        var modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            modal.addEventListener('hidden.bs.modal', function () {
+                // Reset forms when modal is closed
+                const forms = this.querySelectorAll('form');
+                forms.forEach(form => form.reset());
                 
-            case 'academic_help':
-                document.querySelector('input[name="subject"]').required = true;
-                document.querySelector('textarea[name="problem_description"]').required = true;
-                document.querySelector('select[name="meetup_type"]').required = true;
-                break;
-                
-            case 'food_delivery':
-                document.querySelector('input[name="restaurant_name"]').required = true;
-                document.querySelector('textarea[name="order_description"]').required = true;
-                document.querySelector('input[name="location"]').required = true;
-                break;
-        }
-    }
-    
-    // Function to toggle location field visibility
-    function toggleLocationField() {
-        const meetupType = document.querySelector('select[name="meetup_type"]').value;
-        const locationField = document.getElementById('locationField');
-        const locationInput = document.querySelector('input[name="location"]');
-        
-        if (meetupType === 'IN_PERSON') {
-            locationField.classList.remove('d-none');
-            locationInput.required = true;
-        } else {
-            locationField.classList.add('d-none');
-            locationInput.required = false;
-        }
-    }
-    
-    // Function to validate and submit the job form
-    async function submitJob() {
-        const form = document.getElementById('jobPostForm');
-        if (!form.checkValidity()) {
-            form.reportValidity();
-            return;
-        }
-        
-        const formData = new FormData(form);
-        const jobType = formData.get('job_type');
-        
-        let requestBody = {
-            job_type: jobType,
-            fee: parseFloat(formData.get('fee')),
-            datetime: formData.get('datetime')
-        };
-        
-        // Add job-type specific fields
-        switch(jobType) {
-            case 'creative_work':
-                requestBody = {
-                    ...requestBody,
-                    title: formData.get('job_title'),
-                    description: formData.get('job_description'),
-                    meetup_type: formData.get('meetup_type'),
-                    location: formData.get('meetup_type') === 'IN_PERSON' ? formData.get('location') : null
-                };
-                break;
-                
-            case 'academic_help':
-                requestBody = {
-                    ...requestBody,
-                    subject: formData.get('subject'),
-                    description: formData.get('problem_description'),
-                    meetup_type: formData.get('meetup_type'),
-                    location: formData.get('meetup_type') === 'IN_PERSON' ? formData.get('location') : null
-                };
-                break;
-                
-            case 'food_delivery':
-                requestBody = {
-                    ...requestBody,
-                    restaurant_name: formData.get('restaurant_name'),
-                    description: formData.get('order_description'),
-                    delivery_location: formData.get('location')
-                };
-                break;
-        }
-        
-        try {
-            const response = await fetch('/api/jobs', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-                },
-                body: JSON.stringify(requestBody)
+                // Hide all job type fields
+                ['creative_work_fields', 'academic_help_fields', 'food_delivery_fields'].forEach(fields => {
+                    const element = document.getElementById(fields);
+                    if (element) element.classList.add('d-none');
+                });
             });
-            
-            if (response.ok) {
-                showAlert('success', 'Job posted successfully!');
-                $('#postJobModal').modal('hide');
-                setTimeout(() => location.reload(), 1500);
-            } else {
-                throw new Error('Failed to post job');
-            }
-        } catch (error) {
-            showAlert('danger', 'Failed to post job. Please try again.');
-            console.error('Error:', error);
-        }
-    }
-    
-    // Initialize the form when the modal is shown
-    document.getElementById('postJobModal').addEventListener('show.bs.modal', function () {
-        const form = document.getElementById('jobPostForm');
-        form.reset();
-        updateJobFields();
-    });
-    
-    // Add event listeners once DOM is loaded
-    document.addEventListener('DOMContentLoaded', function() {
-        const jobTypeSelect = document.getElementById('jobType');
-        const meetupTypeSelect = document.querySelector('select[name="meetup_type"]');
-        
-        jobTypeSelect?.addEventListener('change', updateJobFields);
-        meetupTypeSelect?.addEventListener('change', toggleLocationField);
+        });
     });
     </script>
-    
 {% endblock %}
-
-
-
