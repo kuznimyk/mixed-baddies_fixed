@@ -6,6 +6,8 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 from bson.objectid import ObjectId
 import datetime
 from functools import wraps
+import os
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__, static_folder='static', static_url_path='/')
 CORS(app)
@@ -14,11 +16,24 @@ CORS(app)
 app.config["MONGO_URI"] = "mongodb://localhost:27017/campusdash"
 app.config["JWT_SECRET_KEY"] = "supersecretkey"  # Change this in production
 app.config["SECRET_KEY"] = "anothersecretkey"  # For session management
+app.config["UPLOAD_FOLDER"] = "static/uploads"
+UPLOAD_FOLDER = 'static/img/Profile'
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
+
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 # Initialize extensions
 mongo = PyMongo(app)
 bcrypt = Bcrypt(app)
 jwt = JWTManager(app)
+
+# Create the upload directory
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+
+# Helper function to check allowed file extensions
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 # Decorators
 def login_required(f):
@@ -29,6 +44,177 @@ def login_required(f):
             return redirect(url_for('login_page'))
         return f(*args, **kwargs)
     return decorated_function
+
+# Create indices for faster querying
+def setup_database_indices():
+    # Users collection indices
+    mongo.db.users.create_index("email", unique=True)
+    mongo.db.users.create_index("student_id", unique=True)
+    
+    # Job type collections indices
+    mongo.db.creative_work.create_index("user_id")
+    mongo.db.academic_help.create_index("user_id")
+    mongo.db.food_delivery.create_index("user_id")
+    
+    # Create TTL index for completed jobs (auto-delete after 90 days)
+    mongo.db.completed_jobs.create_index("completion_time", expireAfterSeconds=7776000)
+
+# Sample document structures
+user_schema = {
+    "_id": ObjectId(),
+    "name": "string",
+    "student_id": "string",
+    "email": "string",
+    "password": "string (hashed)",
+    "payment_info": {
+        "card_number": "string (encrypted)",
+        "card_name": "string",
+        "expiry_date": "string",
+        "cvv": "string (encrypted)"
+    },
+    "degree_type": "string",
+    "degree": "string",
+    "profile_image": "string (default.jpg)",
+    "balance": float,
+    "role": "string",
+    "created_at": datetime
+}
+
+creative_work_schema = {
+    "_id": ObjectId(),
+    "user_id": ObjectId(),  # Reference to user who posted
+    "job_title": "string",
+    "job_description": "string",
+    "fee": float,
+    "meetup_type": "string (IN_PERSON/ONLINE)",
+    "location": "string",
+    "datetime": datetime,
+    "status": "string (open/accepted/completed)",
+    "completion_image": "string (path)",
+    "respondent_id": ObjectId(),  # Reference to user who accepted
+    "created_at": datetime,
+    "updated_at": datetime
+}
+
+academic_help_schema = {
+    "_id": ObjectId(),
+    "user_id": ObjectId(),
+    "subject": "string",
+    "problem_description": "string",
+    "fee": float,
+    "meetup_type": "string (IN_PERSON/ONLINE)",
+    "location": "string",
+    "datetime": datetime,
+    "status": "string (open/accepted/completed)",
+    "completion_image": "string (path)",
+    "respondent_id": ObjectId(),
+    "created_at": datetime,
+    "updated_at": datetime
+}
+
+food_delivery_schema = {
+    "_id": ObjectId(),
+    "user_id": ObjectId(),
+    "restaurant_name": "string",
+    "order_description": "string",
+    "fee": float,
+    "datetime": datetime,
+    "status": "string (open/accepted/completed)",
+    "respondent_id": ObjectId(),
+    "created_at": datetime,
+    "updated_at": datetime
+}
+
+# Helper functions for job operations
+def create_job(job_type, job_data):
+    """Create a new job of specified type"""
+    job_data["created_at"] = datetime.datetime.utcnow()
+    job_data["updated_at"] = datetime.datetime.utcnow()
+    job_data["status"] = "open"
+    
+    collection_map = {
+        "creative_work": mongo.db.creative_work,
+        "academic_help": mongo.db.academic_help,
+        "food_delivery": mongo.db.food_delivery
+    }
+    
+    collection = collection_map.get(job_type)
+    if not collection:
+        raise ValueError("Invalid job type")
+        
+    return collection.insert_one(job_data)
+
+def get_user_jobs(user_id, job_type=None):
+    """Get all jobs posted by a user, optionally filtered by type"""
+    jobs = []
+    
+    if job_type:
+        collection = mongo.db[job_type]
+        jobs = list(collection.find({"user_id": ObjectId(user_id)}))
+    else:
+        # Get jobs from all collections
+        for collection_name in ["creative_work", "academic_help", "food_delivery"]:
+            collection_jobs = list(mongo.db[collection_name].find({"user_id": ObjectId(user_id)}))
+            for job in collection_jobs:
+                job["job_type"] = collection_name
+                jobs.append(job)
+    
+    return jobs
+
+def update_user_profile(user_id, profile_data):
+    """Update user profile including profile image"""
+    update_fields = {
+        "name": profile_data.get("name"),
+        "degree_type": profile_data.get("degree_type"),
+        "degree": profile_data.get("degree")
+    }
+    
+    # Only update profile image if provided
+    if "profile_image" in profile_data:
+        update_fields["profile_image"] = profile_data["profile_image"]
+    
+    return mongo.db.users.update_one(
+        {"_id": ObjectId(user_id)},
+        {"$set": update_fields}
+    )
+
+# Job completion and payment handling
+def complete_job(job_id, data):
+    job = mongo.db.jobs.find_one({"_id": ObjectId(job_id)})
+    if not job:
+        raise ValueError("Job not found")
+
+    completed_job = {
+        "job_details": job["job_details"],
+        "job_price": float(job.get("job_price", 0)),
+        "job_type": job["job_type"],
+        "user_info": job["user_info"],
+        "respondent_info": job["respondent_info"],
+        "completion_time": datetime.datetime.utcnow(),
+        "photo_verification": data.get("photo_verification"),
+        "user_confirmation": data.get("user_confirmation", False),
+        "respondent_confirmation": data.get("respondent_confirmation", False)
+    }
+    
+    # Insert completed job and remove original
+    mongo.db.completed_jobs.insert_one(completed_job)
+    mongo.db.jobs.delete_one({"_id": ObjectId(job_id)})
+    
+    # Handle payment
+    job_price = float(job.get("job_price", 0))
+    if job_price > 0:
+        # Deduct from requester
+        mongo.db.users.update_one(
+            {"_id": ObjectId(job["user_info"]["id"])},
+            {"$inc": {"balance": -job_price}}
+        )
+        
+        # Add to respondent
+        if job["respondent_info"] and "id" in job["respondent_info"]:
+            mongo.db.users.update_one(
+                {"_id": ObjectId(job["respondent_info"]["id"])},
+                {"$inc": {"balance": job_price}}
+            )
 
 # Context processors
 @app.context_processor
@@ -312,5 +498,79 @@ def complete_job():
     except Exception as e:
         return jsonify({"error": "Failed to complete job"}), 500
 
+# Example: Creating a new creative work job
+@app.route("/create_job", methods=["POST"])
+@login_required
+def create_new_job():
+    current_user_id = session.get('user_id')
+    job_data = {
+        "user_id": ObjectId(current_user_id),
+        "job_title": request.form.get("job_title"),
+        "job_description": request.form.get("job_description"),
+        "fee": float(request.form.get("fee")),
+        "meetup_type": request.form.get("meetup_type"),
+        "datetime": datetime.datetime.utcnow()
+    }
+    create_job("creative_work", job_data)
+    flash("Job created successfully!", "success")
+    return redirect(url_for('dashboard'))
+
+# In your signup route
+@app.route("/signup", methods=["POST"])
+def signup():
+    email = request.form.get("email")
+    password = request.form.get("password")
+    hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+    
+    if "profile_image" not in request.files:
+        profile_image = "default.jpg"
+    else:
+        profile_image_file = request.files["profile_image"]
+        profile_image = profile_image_file.filename
+        profile_image_file.save(os.path.join(app.config["UPLOAD_FOLDER"], profile_image))
+    
+    user_data = {
+        "name": request.form.get("name"),
+        "student_id": request.form.get("student_id"),
+        "email": email,
+        "password": hashed_password,
+        "degree_type": request.form.get("degree_type"),
+        "degree": request.form.get("degree"),
+        "profile_image": profile_image,
+        "balance": 0.0,
+        "role": "user",
+        "created_at": datetime.datetime.utcnow()
+    }
+    
+    mongo.db.users.insert_one(user_data)
+    flash("Signup successful! Please log in.", "success")
+    return redirect(url_for('login_page'))
+
+# New route for updating profile image
+@app.route("/api/users/me/profile-image", methods=["POST"])
+@jwt_required()
+def update_profile_image():
+    if 'profile_image' not in request.files:
+        return jsonify({"error": "No file provided"}), 400
+        
+    file = request.files['profile_image']
+    if file.filename == '':
+        return jsonify({"error": "No file selected"}), 400
+        
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+        
+        user_id = get_jwt_identity()
+        mongo.db.users.update_one(
+            {"_id": ObjectId(user_id)},
+            {"$set": {"profile_image": filename}}
+        )
+        
+        return jsonify({"message": "Profile image updated successfully"}), 200
+    
+    return jsonify({"error": "Invalid file type"}), 400
+
 if __name__ == "__main__":
+    setup_database_indices()
     app.run(debug=True)
