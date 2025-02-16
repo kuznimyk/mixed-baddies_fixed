@@ -10,9 +10,12 @@
 </head>
 <body>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-success">
+<nav class="navbar navbar-expand-lg navbar-dark bg-success ">
     <div class="container">
-        <a class="navbar-brand" href="/">CampusGigs</a>
+        <a class="navbar-brand d-flex justify-content-start" href="/">
+            <img src="{{ url_for('static', filename='img/Profile/CampusGigslogo.png') }}" alt="CampusGigs Logo" class="navbar-logo" style="width: 30px; height: auto;">
+            <span class="ms-2">CampusGigs</span>
+        </a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
