@@ -7,7 +7,7 @@ from bson.objectid import ObjectId
 import datetime
 from functools import wraps
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', static_url_path='/')
 CORS(app)
 
 # Configuration
@@ -39,27 +39,18 @@ def inject_user():
         return {'current_user': user}
     return {'current_user': None}
 
-# Error handlers
-@app.errorhandler(404)
-def not_found_error(error):
-    return render_template('errors/404.html'), 404
-
-@app.errorhandler(500)
-def internal_error(error):
-    return render_template('errors/500.html'), 500
-
 # Public routes
 @app.route("/")
 def home():
     tasks = mongo.db.jobs.find({"status": "open"}).limit(10)
-    return render_template('index.html', tasks=tasks)
+    return render_template('index.html', tasks=tasks, logged_in= 'user_id' in session)
 
 # Authentication routes
 @app.route("/signup", methods=["GET", "POST"])
 def signup_page():
         
     if request.method == "GET":
-        return render_template('signup.html')
+        return render_template('signup.html', logged_in= 'user_id' in session)
         
     # POST request handling
     existing_user = mongo.db.users.find_one({"email": request.form.get("email")})
@@ -102,7 +93,7 @@ def signup_page():
 def login_page():
         
     if request.method == "GET":
-        return render_template('login.html')
+        return render_template('login.html', logged_in= 'user_id' in session)
         
     # POST request handling
     try:
@@ -148,7 +139,7 @@ def dashboard():
                              user=user, 
                              posted_jobs=posted_jobs,
                              accepted_jobs=accepted_jobs,
-                             completed_jobs=completed_jobs)
+                             completed_jobs=completed_jobs, logged_in= 'user_id' in session)
                              
     except Exception as e:
         flash("An error occurred while loading your dashboard.", "danger")
