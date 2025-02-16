@@ -107,8 +107,8 @@
                     <h4 class="mb-0">Completed Jobs</h4>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-hover">
+                    <div class="table-responsive completed-jobs" style="max-height: 300px; overflow-y: auto;">
+                    <table class="table table-hover">
                             <thead>
                                 <tr>
                                     <th>Job</th>
@@ -118,19 +118,26 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- This would be populated from backend -->
-                                <tr>
-                                    <td>Tutoring session</td>
-                                    <td>Feb 10, 2025</td>
-                                    <td>Provider</td>
-                                    <td class="text-success">+$35.00</td>
-                                </tr>
-                                <tr>
-                                    <td>Lunch delivery</td>
-                                    <td>Feb 5, 2025</td>
-                                    <td>Requester</td>
-                                    <td class="text-danger">-$12.50</td>
-                                </tr>
+                            <!-- This will be populated dynamically -->
+
+                            <tr>
+                                <td>Dog walking</td>
+                                <td>Jan 25, 2025</td>
+                                <td>Provider</td>
+                                <td class="text-success">+$10.00</td>
+                            </tr>
+                            <tr>
+                                <td>Assignment help</td>
+                                <td>Jan 20, 2025</td>
+                                <td>Requester</td>
+                                <td class="text-danger">-$18.00</td>
+                            </tr>
+                            <tr>
+                                <td>Package delivery</td>
+                                <td>Jan 15, 2025</td>
+                                <td>Provider</td>
+                                <td class="text-success">+$12.00</td>
+                            </tr>
                             </tbody>
                         </table>
                     </div>
