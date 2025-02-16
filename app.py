@@ -34,41 +34,25 @@ def home():
     return render_template('index.html')
 
 # Signup page route
-@app.route("/signup", methods=["GET"])
+@app.route("/signup", methods=["GET", "POST"])
 def signup_page():
-    return render_template('signup.html')
-
-# Login page route
-@app.route("/login", methods=["GET"])
-def login_page():
-    return render_template('login.html')
-
-# Dashboard route (protected)
-@app.route("/dashboard")
-@login_required
-def dashboard():
-    user_id = session.get('user_id')
-    user = mongo.db.users.find_one({"_id": ObjectId(user_id)})
-    return render_template('dashboard.html', user=user)
-
-# Process signup form
-@app.route("/process_signup", methods=["POST"])
-def process_signup():
-    # Check if email already exists
-    existing_user = mongo.db.users.find_one({"email": request.form.get("email")})
+    if request.method == "GET":
+        return render_template('signup.html')
+    elif request.method == "POST":
+        existing_user = mongo.db.users.find_one({"email": request.form.get("email")})
     if existing_user:
         flash("Email already registered")
         return redirect(url_for('signup_page'))
-    
+
     # Check if student ID already exists
     existing_student = mongo.db.users.find_one({"student_id": request.form.get("student_id")})
     if existing_student:
         flash("Student ID already registered")
         return redirect(url_for('signup_page'))
-    
+
     # Hash password
     hashed_pw = bcrypt.generate_password_hash(request.form.get("password")).decode('utf-8')
-    
+
     # Insert new user
     user_id = mongo.db.users.insert_one({
         "name": request.form.get("name"),
@@ -79,55 +63,40 @@ def process_signup():
         "degree_type": request.form.get("degree_type", "Undeclared"),
         "role": "user"
     }).inserted_id
-    
+
     flash("Registration successful! Please log in.")
     return redirect(url_for('login_page'))
 
-# Process login form
-@app.route("/process_login", methods=["POST"])
-def process_login():
-    user = mongo.db.users.find_one({"email": request.form.get("email")})
-    
-    if user and bcrypt.check_password_hash(user["password"], request.form.get("password")):
-        session['user_id'] = str(user["_id"])
-        session['user_name'] = user["name"]
-        return redirect(url_for('dashboard'))
-    
-    flash("Invalid email or password")
-    return redirect(url_for('login_page'))
+# Login page route
+@app.route("/login", methods=["GET", "POST"])
+def login_page():
+    if request.method == "GET":
+        return render_template('login.html')
+    elif request.method == "POST":
+        user = mongo.db.users.find_one({"email": request.form.get("email")})
+
+        if user and bcrypt.check_password_hash(user["password"], request.form.get("password")):
+            session['user_id'] = str(user["_id"])
+            session['user_name'] = user["name"]
+            session['access_token'] = create_access_token(identity=str(user["_id"]))
+            return redirect(url_for('dashboard'))
+
+        flash("Invalid email or password")
+        return redirect(url_for('login_page'))
+
+# Dashboard route (protected)
+@app.route("/dashboard")
+@login_required
+def dashboard():
+    user_id = session.get('user_id')
+    user = mongo.db.users.find_one({"_id": ObjectId(user_id)})
+    return render_template('dashboard.html', user=user)
 
 # Logout route
 @app.route("/logout")
 def logout():
     session.clear()
     return redirect(url_for('home'))
-
-# User Signup API (original)
-@app.route("/signup", methods=["POST"])
-def signup():
-    data = request.json
-    hashed_pw = bcrypt.generate_password_hash(data["password"]).decode('utf-8')
-    user_id = mongo.db.users.insert_one({
-        "name": data["name"],
-        "student_id": data["student_id"],
-        "email": data["email"],
-        "password": hashed_pw,
-        "payment_info": data.get("payment_info", {}),
-        "degree_type": data.get("degree_type", "Undeclared"),
-        "role": data.get("role", "user")
-    }).inserted_id
-    return jsonify({"message": "User registered successfully", "user_id": str(user_id)}), 201
-
-# User Login API (original)
-@app.route("/login", methods=["POST"])
-def login():
-    data = request.json
-    user = mongo.db.users.find_one({"email": data["email"]})
-    
-    if user and bcrypt.check_password_hash(user["password"], data["password"]):
-        access_token = create_access_token(identity=str(user["_id"]))
-        return jsonify({"message": "Login successful", "token": access_token}), 200
-    return jsonify({"error": "Invalid email or password"}), 401
 
 # Keep the rest of your routes as they were...
 @app.route("/jobs", methods=["POST"])
