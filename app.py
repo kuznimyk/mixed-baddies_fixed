@@ -13,7 +13,7 @@ app = Flask(__name__, static_folder='static', static_url_path='/')
 CORS(app)
 
 # Configuration
-app.config["MONGO_URI"] = "mongodb://localhost:27017/campusdash"
+app.config["MONGO_URI"] = "mongodb+srv://root:Qwerty%2B1@cluster0.q3gur.mongodb.net/CampusGig?retryWrites=true&w=majority&appName=Cluster0"
 app.config["JWT_SECRET_KEY"] = "supersecretkey"  # Change this in production
 app.config["SECRET_KEY"] = "anothersecretkey"  # For session management
 app.config["UPLOAD_FOLDER"] = "static/uploads"
