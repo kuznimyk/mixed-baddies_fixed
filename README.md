@@ -11,7 +11,6 @@ CampusGigs is a **student-run job posting platform** where students can **post, 
 - 🔍 **Find on-campus gigs** (food delivery, tutoring, creative work).
 - 💰 **Flexible pricing** – students set their own rates.
 - 🏫 **Student-only network** – verified student registration.
-- 📸 **Photo verification** – prevents job disputes.
 - 🔄 **Real-time job updates** – automatic job status tracking.
 - 🔐 **Secure payment system** – escrow-based transactions.
 - 🏷 **Fuzzy search with FuzzyBuzzy** – quickly find relevant jobs.
@@ -62,15 +61,7 @@ python3 -m flask run
 http://localhost:5000
 ```
 
-## 🌐 API Endpoints
-CampusGigs provides RESTful API routes for interacting with the platform.
 
-| Method | Endpoint | Description |
-|--------|---------|-------------|
-| `GET`  | `/jobs` | Retrieve all job posts |
-| `POST` | `/jobs/create` | Create a new job post |
-| `PUT`  | `/jobs/update/<id>` | Update job post details |
-| `DELETE` | `/jobs/delete/<id>` | Remove a job post |
 
 📌 **Note**: Ensure you have **Flask running** before testing the API.
 
@@ -96,7 +87,6 @@ We welcome contributions! To contribute:
 For major changes, please open an issue first to discuss your proposal.
 
 ## 📜 License
-This project is licensed under the **MIT License** – see the [LICENSE](LICENSE) file for details.
 
 ## 🔮 What's Next?
 Here’s what’s coming soon in future updates:
@@ -104,5 +94,7 @@ Here’s what’s coming soon in future updates:
 - 📡 **AI-Powered Job Recommendations** – Smart matching based on user activity.
 - 💳 **Multiple Payment Options** – Secure escrow-based transactions.
 - 🎓 **Expand to More Campuses** – Grow the student network beyond a single university.
+-  📸 **Photo verification** – prevents job disputes.
+
 
 CampusGigs has the **potential to revolutionize student gig work**, and we’re excited to **continue building, refining, and expanding**. The journey doesn’t stop here—we’re just getting started! 🚀
