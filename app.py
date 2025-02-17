@@ -3,8 +3,7 @@ from flask_pymongo import PyMongo
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
-from bson.objectid import ObjectId
-import datetime
+from db_schemes import *
 from functools import wraps
 import os
 from rapidfuzz import process, fuzz
@@ -61,71 +60,7 @@ def setup_database_indices():
     # Create TTL index for completed jobs (auto-delete after 90 days)
     mongo.db.completed_jobs.create_index("completion_time", expireAfterSeconds=7776000)
 
-# Sample document structures
-user_schema = {
-    "_id": ObjectId(),
-    "name": "string",
-    "student_id": "string",
-    "email": "string",
-    "password": "string (hashed)",
-    "payment_info": {
-        "card_number": "string (encrypted)",
-        "card_name": "string",
-        "expiry_date": "string",
-        "cvv": "string (encrypted)"
-    },
-    "degree_type": "string",
-    "degree": "string",
-    "profile_image": "string (default.jpg)",
-    "balance": float,
-    "role": "string",
-    "created_at": datetime
-}
 
-creative_work_schema = {
-    "_id": ObjectId(),
-    "user_id": ObjectId(),  # Reference to user who posted
-    "job_title": "string",
-    "job_description": "string",
-    "fee": float,
-    "meetup_type": "string (IN_PERSON/ONLINE)",
-    "location": "string",
-    "datetime": datetime,
-    "status": "string (Not Accepted Yet/Accepted/completed)",
-    "completion_image": "string (path)",
-    "respondent_id": ObjectId(),  # Reference to user who accepted
-    "created_at": datetime,
-    "updated_at": datetime
-}
-
-academic_help_schema = {
-    "_id": ObjectId(),
-    "user_id": ObjectId(),
-    "subject": "string",
-    "problem_description": "string",
-    "fee": float,
-    "meetup_type": "string (IN_PERSON/ONLINE)",
-    "location": "string",
-    "datetime": datetime,
-    "status": "string (Not Accepted Yet/Accepted/completed)",
-    "completion_image": "string (path)",
-    "respondent_id": ObjectId(),
-    "created_at": datetime,
-    "updated_at": datetime
-}
-
-food_delivery_schema = {
-    "_id": ObjectId(),
-    "user_id": ObjectId(),
-    "restaurant_name": "string",
-    "order_description": "string",
-    "fee": float,
-    "datetime": datetime,
-    "status": "string (Not Accepted Yet/Accepted/completed)",
-    "respondent_id": ObjectId(),
-    "created_at": datetime,
-    "updated_at": datetime
-}
 
 # Helper functions for job operations
 
@@ -604,10 +539,17 @@ def create_new_job():
             flash("Job type is required", "danger")
             return redirect(url_for('dashboard'))
 
+        if job_type == "creative_work":
+            fee_str = request.form.get("fee_creative")
+        elif job_type == "academic_help":
+            fee_str = request.form.get("fee_academic")
+        elif job_type == "food_delivery":
+            fee_str = request.form.get("fee_food")
+        else:
+            fee_str = ''
         # Debug: Print fee value specifically
-        fee_str = request.form.get("fee")
 
-        print(fee_str)
+        print("Fee: " + fee_str)
         # Parse and validate fee
         try:
             if fee_str and fee_str.strip():
@@ -694,7 +636,7 @@ def create_job(job_type, job_data):
         # Debug: Print incoming job data
         
         # Ensure fee is a float
-        fee = float(job_data.get('fee', 0.0))
+        fee = float(job_data.get('fee'))
 
         # Create base job document with explicit fee
         base_job = {
