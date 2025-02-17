@@ -107,10 +107,10 @@
                             <button class="nav-link" id="accepted-tab" data-bs-toggle="tab" data-bs-target="#accepted" type="button" role="tab">Jobs I Accepted</button>
                         </li>
                     </ul>
-                    <div class="tab-content pt-3" id="jobTabsContent" style="max-height: 390px; overflow-y: auto;">
+                    <div class="tab-content pt-3" id="jobTabsContent" >
                         <!-- Jobs I Posted Tab -->
                         <div class="tab-pane fade show active" id="posted" role="tabpanel">
-                            <div class="list-group">
+                            <div class="list-group" style="max-height: 390px; overflow-y: auto;">
                                 {% for job in posted_jobs %}
                                     <a href="#" class="list-group-item list-group-item-action">
                                         <div class="d-flex w-100 justify-content-between">
@@ -126,10 +126,10 @@
                                 <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#postJobModal">Post New Job</button>
                             </div>
                         </div>
-                        
+
                         <!-- Jobs I Accepted Tab -->
                         <div class="tab-pane fade" id="accepted" role="tabpanel">
-                            <div class="list-group">
+                            <div class="list-group" style="max-height: 390px; overflow-y: auto;">
                                 <a href="#" class="list-group-item list-group-item-action">
                                     <div class="d-flex w-100 justify-content-between">
                                         <h5 class="mb-1">Notes for BIO 101</h5>
