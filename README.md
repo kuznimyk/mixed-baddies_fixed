@@ -18,8 +18,8 @@ CampusGigs is a **student-run job posting platform** where students can **post, 
 ## 📸 Screenshots
 Here are some previews of CampusGigs:
 
-![CampusGigs Dashboard](static/images/dashboard.png)
-![Job Listing](static/images/job-listing.png)
+![CampusGigs Dashboard](static/img/Profile/dashboard.png)
+![Job Listing](static/img/Profile/home.png)
 
 ## 🛠 Installation & Setup
 ### 1️⃣ Clone the Repository
