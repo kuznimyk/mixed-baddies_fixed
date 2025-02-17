@@ -3,6 +3,15 @@
 
 {% block content %}
 <main class="container mt-4">
+    <style>
+        .hover-lift {
+            transition: transform 0.2s ease-in-out;
+        }
+        .hover-lift:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+
     <section class="row mb-4">
         <div class="col-12">
             <h1>Find Campus Tasks</h1>
@@ -13,11 +22,11 @@
     <!-- Task Filters -->
     <section class="row mb-4">
         <div class="col-12">
-            <div class="card">
+            <div class="card hover-lift">
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-4">
-                            <select class="form-select">
+                            <select class="form-select hover-lift">
                                 <option>All Categories</option>
                                 <option>Academic Help</option>
                                 <option>Food Delivery</option>
@@ -25,10 +34,10 @@
                             </select>
                         </div>
                         <div class="col-md-6">
-                            <input type="text" class="form-control" placeholder="Search tasks...">
+                            <input type="text" class="form-control hover-lift" placeholder="Search tasks...">
                         </div>
                         <div class="col-md-2">
-                            <button class="btn btn-success w-100">Search</button>
+                            <button class="btn btn-success w-100 hover-lift">Search</button>
                         </div>
                     </div>
                 </div>
@@ -39,7 +48,7 @@
     <!-- Dynamic Job Listings -->
     <section class="row">
         {% for job in jobs %}
-        <div class="col-md-6 mb-4">
+        <div class="col-md-6 mb-4 hover-lift">
             <div class="card">
                 <div class="card-body">
                     <div class="d-flex justify-content-between">
@@ -53,7 +62,7 @@
                         <small class="text-muted">
                             Posted {{ job.get('created_at').strftime('%b %d, %Y') if job.get('created_at') else 'Recently' }}
                         </small>
-                        <button class="btn btn-outline-success">Accept Task</button>
+                        <button class="btn btn-outline-success hover-lift">Accept Task</button>
                     </div>
                 </div>
             </div>
@@ -63,7 +72,7 @@
 
     <!-- Request Help Button -->
     <div class="fixed-bottom m-4" style="right: 0; left: auto;">
-        <button class="btn btn-lg btn-success rounded-circle" 
+        <button class="btn btn-lg btn-success rounded-circle hover-lift" 
                 style="width: 60px; height: 60px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);"
                 data-bs-toggle="tooltip" 
                 data-bs-placement="left" 
