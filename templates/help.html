@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Help - CampusGigs{% endblock %}
+
+{% block content %}
+    <div class="container d-flex justify-content-center align-items-center vh-100">
+        <div class="card shadow p-4" style="max-width: 500px; width: 100%;">
+            <h2 class="text-center mb-3">Request Help</h2>
+
+            <form id="helpForm" method="POST">
+                <!-- Problem Topic -->
+                <div class="mb-3">
+                    <label for="problemTopic" class="form-label fw-bold">Problem Topic</label>
+                    <input type="text" class="form-control" id="problemTopic" name="problem_topic"
+                           placeholder="Enter a topic (e.g., Payment issue)" required>
+                </div>
+
+                <!-- Problem Description -->
+                <div class="mb-3">
+                    <label for="problemDescription" class="form-label fw-bold">Describe Your Issue</label>
+                    <textarea class="form-control" id="problemDescription" name="problem_description"
+                              rows="4" placeholder="Provide more details..." required></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-success">Submit Request</button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}

@@ -192,6 +192,10 @@ def search_result():
     print(matched_jobs)
     return render_template('index.html', jobs=matched_jobs, logged_in='user_id' in session)
 
+@app.route("/help")
+def help_page():
+    return render_template('help.html')
+
 # Authentication routes
 @app.route("/signup", methods=["GET", "POST"])
 def signup_page():
