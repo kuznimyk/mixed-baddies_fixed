@@ -82,7 +82,7 @@
             <div class="card shadow mt-4">
                 <div class="card-body">
                     <h4 class="card-title">My Balance</h4>
-                    <h2 class="text-success">${{ user.balance|default(0.00)|round(3) }}</h2>
+                    <h2 class="text-success">${{ user.balance|default(0.000)|round(3) }}</h2>
                     <div class="d-grid gap-2 mt-3">
                         <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addFundsModal">Add Funds</button>
                         <button class="btn btn-outline-success" data-bs-toggle="modal" data-bs-target="#withdrawFundsModal">Withdraw</button>

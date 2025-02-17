@@ -79,6 +79,8 @@
     }
 </style>
 
+
+<!-- JavaScript to Apply Dark Mode on Every Page -->
 <script>
     document.addEventListener("DOMContentLoaded", function () {
         const savedMode = localStorage.getItem("accessibilityMode");
@@ -123,6 +125,15 @@
 <footer class="bg-light mt-5 py-3 fixed-bottom">
     <div class="container text-center">
         <p>&copy; 2025 CampusGigs.</p>
+    </div>
+    <div class="fixed-bottom m-3" style="right: 0; left: auto;">
+        <button class="btn btn-lg btn-success rounded-circle hover-lift" 
+                style="width: 50px; height: 50px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);"
+                data-bs-toggle="tooltip" 
+                data-bs-placement="left" 
+                title="Request Help">
+            <i class="bi bi-plus-lg" style="font-size: 24px;">+</i>
+        </button>
     </div>
 </footer>
 
@@ -171,5 +182,56 @@
         }
     }
 </script>
+
+<!-- Image upload -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const profileImageInput = document.getElementById("profileImageInput");
+        const profilePreview = document.getElementById("profilePreview");
+
+        // Live preview of selected profile image
+        profileImageInput.addEventListener("change", function (event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    profilePreview.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Apply Changes Button - Upload image via AJAX
+        document.getElementById("applyChangesBtn").addEventListener("click", async function () {
+            const formData = new FormData(document.getElementById("editProfileForm"));
+
+            try {
+                let response = await fetch("{{ url_for('update_profile_image') }}", {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (response.ok) {
+                    showAlert("success", "Profile picture updated successfully!");
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    throw new Error("Upload failed");
+                }
+            } catch (error) {
+                showAlert("danger", "Failed to update profile picture. Try again.");
+                console.error(error);
+            }
+        });
+    });
+
+    function showAlert(type, message) {
+        const alertDiv = document.createElement("div");
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `${message} <button type="button" class="btn-close" data-bs-dismiss="alert"></button>`;
+        document.querySelector(".container").insertBefore(alertDiv, document.querySelector(".container").firstChild);
+        setTimeout(() => alertDiv.remove(), 3000);
+    }
+</script>
+
 </body>
 </html>

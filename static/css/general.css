@@ -152,5 +152,10 @@ main {
   color: #000000;
 }
 
+@media (min-width: 1300px) and (max-width: 1599px) {
+  .container {
+    width: 1200px;
+  }
+}
 
 
