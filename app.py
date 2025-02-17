@@ -13,7 +13,7 @@ app = Flask(__name__, static_folder='static', static_url_path='/')
 CORS(app)
 
 # Configuration
-app.config["MONGO_URI"] = "mongodb+srv://root:Qwerty%2B1@cluster0.q3gur.mongodb.net/CampusGig?retryWrites=true&w=majority&appName=Cluster0"
+app.config["MONGO_URI"] = "mongodb://localhost:27017/campusdash"
 app.config["JWT_SECRET_KEY"] = "supersecretkey"  # Change this in production
 app.config["SECRET_KEY"] = "anothersecretkey"  # For session management
 app.config["UPLOAD_FOLDER"] = "static/uploads"
@@ -126,23 +126,8 @@ food_delivery_schema = {
 }
 
 # Helper functions for job operations
-def create_job(job_type, job_data):
-    """Create a new job of specified type"""
-    job_data["created_at"] = datetime.datetime.utcnow()
-    job_data["updated_at"] = datetime.datetime.utcnow()
-    job_data["status"] = "open"
-    
-    collection_map = {
-        "creative_work": mongo.db.creative_work,
-        "academic_help": mongo.db.academic_help,
-        "food_delivery": mongo.db.food_delivery
-    }
-    
-    collection = collection_map.get(job_type)
-    if not collection:
-        raise ValueError("Invalid job type")
-        
-    return collection.insert_one(job_data)
+
+
 
 def get_user_jobs(user_id, job_type=None):
     """Get all jobs posted by a user, optionally filtered by type"""
@@ -190,7 +175,7 @@ def complete_job(job_id, data):
         "job_type": job["job_type"],
         "user_info": job["user_info"],
         "respondent_info": job["respondent_info"],
-        "completion_time": datetime.datetime.utcnow(),
+        "completion_time": datetime.now(),
         "photo_verification": data.get("photo_verification"),
         "user_confirmation": data.get("user_confirmation", False),
         "respondent_confirmation": data.get("respondent_confirmation", False)
@@ -228,8 +213,17 @@ def inject_user():
 # Public routes
 @app.route("/")
 def home():
-    tasks = mongo.db.jobs.find({"status": "open"}).limit(10)
-    return render_template('index.html', tasks=tasks, logged_in= 'user_id' in session)
+    try:
+        jobs = get_all_jobs()
+        print("Jobs fetched for homepage:", jobs)  # Debugging print
+        formatted_jobs = [format_job_for_display(job) for job in jobs]
+        return render_template('index.html', jobs=formatted_jobs, logged_in='user_id' in session)
+    except Exception as e:
+        print("Error loading jobs:", str(e))
+        flash("Error loading jobs.", "danger")
+        return render_template('index.html', jobs=[], logged_in='user_id' in session)
+
+
 
 # Authentication routes
 @app.route("/signup", methods=["GET", "POST"])
@@ -264,7 +258,7 @@ def signup_page():
             "degree": request.form.get("degree", ""),
             "balance": 0.0,
             "role": "user",
-            "created_at": datetime.datetime.utcnow()
+            "created_at": datetime.now()
         }
         
         user_id = mongo.db.users.insert_one(user_data).inserted_id
@@ -352,7 +346,7 @@ def jobs():
         job_data = {
             "place": data["place"],
             "meet_place": data.get("meet_place", "IN PERSON"),
-            "post_time": datetime.datetime.utcnow(),
+            "post_time": datetime.now(),
             "meet_time": data.get("meet_time"),
             "job_price": float(data.get("job_price", 0)),
             "job_details": data["job_details"],
@@ -467,7 +461,7 @@ def complete_job():
             "job_type": job["job_type"],
             "user_info": job["user_info"],
             "respondent_info": job["respondent_info"],
-            "completion_time": datetime.datetime.utcnow(),
+            "completion_time": datetime.now(),
             "photo_verification": data.get("photo_verification"),
             "user_confirmation": data.get("user_confirmation", False),
             "respondent_confirmation": data.get("respondent_confirmation", False)
@@ -499,21 +493,9 @@ def complete_job():
         return jsonify({"error": "Failed to complete job"}), 500
 
 # Example: Creating a new creative work job
-@app.route("/create_job", methods=["POST"])
-@login_required
-def create_new_job():
-    current_user_id = session.get('user_id')
-    job_data = {
-        "user_id": ObjectId(current_user_id),
-        "job_title": request.form.get("job_title"),
-        "job_description": request.form.get("job_description"),
-        "fee": float(request.form.get("fee")),
-        "meetup_type": request.form.get("meetup_type"),
-        "datetime": datetime.datetime.utcnow()
-    }
-    create_job("creative_work", job_data)
-    flash("Job created successfully!", "success")
-    return redirect(url_for('dashboard'))
+
+
+
 
 # In your signup route
 @app.route("/signup", methods=["POST"])
@@ -539,7 +521,7 @@ def signup():
         "profile_image": profile_image,
         "balance": 0.0,
         "role": "user",
-        "created_at": datetime.datetime.utcnow()
+        "created_at": datetime.now()
     }
     
     mongo.db.users.insert_one(user_data)
@@ -570,6 +552,229 @@ def update_profile_image():
         return jsonify({"message": "Profile image updated successfully"}), 200
     
     return jsonify({"error": "Invalid file type"}), 400
+
+# Update the create_job function in app.py
+# Add this to your app.py
+
+@app.route("/create_new_job", methods=["POST"])
+@login_required
+def create_new_job():
+    try:
+        # Debug: Print all form data
+        print("Received form data:", request.form.to_dict())
+        
+        job_type = request.form.get("job_type")
+        if not job_type:
+            flash("Job type is required", "danger")
+            return redirect(url_for('dashboard'))
+
+        # Debug: Print fee value specifically
+        fee_str = request.form.get("fee")
+        print(f"Raw fee value: {fee_str}")
+        print(f"Fee type: {type(fee_str)}")
+
+        # Parse and validate fee
+        try:
+            if fee_str and fee_str.strip():
+                fee = float(fee_str)
+                print(f"Converted fee: {fee}")
+                print(f"Converted fee type: {type(fee)}")
+                if fee < 0:
+                    raise ValueError("Fee cannot be negative")
+            else:
+                fee = 0.0
+                print("No fee provided, defaulting to 0.0")
+        except ValueError as e:
+            print(f"Fee conversion error: {str(e)}")
+            flash(f"Invalid fee value: {str(e)}", "danger")
+            return redirect(url_for('dashboard'))
+
+        # Create job data with explicit fee
+        job_data = {
+            "user_id": session.get('user_id'),
+            "fee": fee,  # Use the validated fee
+            "datetime": request.form.get("datetime"),
+            "meetup_type": request.form.get("meetup_type", "VIRTUAL")
+        }
+
+        print("Job data before type-specific updates:", job_data)
+
+        # Add job type specific fields
+        if job_type == "creative_work":
+            if not request.form.get("job_title"):
+                raise ValueError("Job title is required")
+            if not request.form.get("job_description"):
+                raise ValueError("Job description is required")
+                
+            job_data.update({
+                "job_title": request.form.get("job_title"),
+                "job_description": request.form.get("job_description"),
+                "location": request.form.get("location") if request.form.get("meetup_type") == "IN_PERSON" else None
+            })
+        elif job_type == "academic_help":
+            if not request.form.get("subject"):
+                raise ValueError("Subject is required")
+            if not request.form.get("problem_description"):
+                raise ValueError("Problem description is required")
+                
+            job_data.update({
+                "subject": request.form.get("subject"),
+                "problem_description": request.form.get("problem_description"),
+                "location": request.form.get("location") if request.form.get("meetup_type") == "IN_PERSON" else None
+            })
+        elif job_type == "food_delivery":
+            if not request.form.get("restaurant_name"):
+                raise ValueError("Restaurant name is required")
+            if not request.form.get("order_description"):
+                raise ValueError("Order description is required")
+                
+            job_data.update({
+                "restaurant_name": request.form.get("restaurant_name"),
+                "order_description": request.form.get("order_description")
+            })
+
+        print("Final job data before creation:", job_data)
+
+        # Create the job with explicit fee value
+        result = create_job(job_type, job_data)
+        
+        # Debug: Print the result
+        print("Job creation result:", result)
+        
+        if result:
+            flash("Job created successfully!", "success")
+        else:
+            flash("Job creation failed - no ID returned", "danger")
+            
+        return redirect(url_for('dashboard'))
+
+    except Exception as e:
+        print(f"Error in create_new_job: {str(e)}")
+        print(f"Error type: {type(e)}")
+        flash("An error occurred while creating the job.", "danger")
+        return redirect(url_for('dashboard'))
+
+def create_job(job_type, job_data):
+    """Create a new job with explicit fee handling"""
+    try:
+        # Debug: Print incoming job data
+        print("Creating job with data:", job_data)
+        print(f"Fee value: {job_data.get('fee')}")
+        print(f"Fee type: {type(job_data.get('fee'))}")
+        
+        # Ensure fee is a float
+        fee = float(job_data.get('fee', 0.0))
+        print(f"Final fee value: {fee}")
+        
+        # Create base job document with explicit fee
+        base_job = {
+            "user_id": ObjectId(job_data["user_id"]),
+            "fee": fee,  # Explicitly set fee
+            "status": "open",
+            "created_at": datetime.datetime.now(),
+            "updated_at": datetime.datetime.now(),
+            "datetime": job_data.get("datetime", datetime.datetime.now())
+        }
+        
+        print("Base job document:", base_job)
+        
+        # Add type-specific fields
+        if job_type == "creative_work":
+            collection = mongo.db.creative_work
+            base_job.update({
+                "job_title": job_data["job_title"],
+                "job_description": job_data["job_description"],
+                "meetup_type": job_data.get("meetup_type", "VIRTUAL"),
+                "location": job_data.get("location")
+            })
+        elif job_type == "academic_help":
+            collection = mongo.db.academic_help
+            base_job.update({
+                "subject": job_data["subject"],
+                "problem_description": job_data["problem_description"],
+                "meetup_type": job_data.get("meetup_type", "VIRTUAL"),
+                "location": job_data.get("location")
+            })
+        elif job_type == "food_delivery":
+            collection = mongo.db.food_delivery
+            base_job.update({
+                "restaurant_name": job_data["restaurant_name"],
+                "order_description": job_data["order_description"]
+            })
+        
+        print("Final document to insert:", base_job)
+        
+        # Insert document and verify fee
+        result = collection.insert_one(base_job)
+        
+        # Debug: Verify the inserted document
+        inserted_doc = collection.find_one({"_id": result.inserted_id})
+        print("Inserted document:", inserted_doc)
+        print(f"Inserted fee value: {inserted_doc.get('fee')}")
+        
+        return str(result.inserted_id)
+        
+    except Exception as e:
+        print(f"Error in create_job: {str(e)}")
+        print(f"Error type: {type(e)}")
+        raise
+
+def get_all_jobs():
+    """
+    Retrieve all active jobs from all collections with type information
+    Returns a list of jobs sorted by creation date
+    """
+    all_jobs = []
+    
+    # Collect jobs from each type
+    job_types = ["creative_work", "academic_help", "food_delivery"]
+    
+    for job_type in job_types:
+        jobs = list(mongo.db[job_type].find({"status": "open"}))
+        for job in jobs:
+            job["_id"] = str(job["_id"])
+            job["user_id"] = str(job["user_id"])
+            job["job_type"] = job_type
+            all_jobs.append(job)
+    
+    # Sort by creation date (newest first)
+    return sorted(all_jobs, key=lambda x: x["created_at"], reverse=True)
+
+def format_job_for_display(job):
+    """
+    Format a job document for display in the template
+    """
+    formatted_job = {
+        "id": str(job["_id"]),
+        "fee": "{:.2f}".format(job["fee"]),
+        "created_at": job["created_at"],
+        "job_type": job.get("job_type", "unknown"),
+        "status": job["status"]
+    }
+    
+    # Add type-specific display fields
+    if job["job_type"] == "creative_work":
+        formatted_job.update({
+            "title": job["job_title"],
+            "description": job["job_description"],
+            "location": job.get("location", "Online"),
+            "meetup_type": job["meetup_type"]
+        })
+    elif job["job_type"] == "academic_help":
+        formatted_job.update({
+            "title": f"Help needed with {job['subject']}",
+            "description": job["problem_description"],
+            "location": job.get("location", "Online"),
+            "meetup_type": job["meetup_type"]
+        })
+    elif job["job_type"] == "food_delivery":
+        formatted_job.update({
+            "title": f"Food Delivery from {job['restaurant_name']}",
+            "description": job["order_description"]
+        })
+        
+    return formatted_job
+
 
 if __name__ == "__main__":
     setup_database_indices()
