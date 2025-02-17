@@ -8,6 +8,90 @@
     <!-- Add Bootstrap CSS for better styling -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
 </head>
+
+<!-- Dark Mode Styles -->
+<style>
+    /* Dark Mode */
+    body.dark-mode {
+        background-color: black !important;
+        color: white !important;
+    }
+    .dark-mode .card {
+        background-color: #1e1e1e;
+        color: white;
+        border-color: #333;
+    }
+    .dark-mode .modal-content {
+        background-color: #1e1e1e;
+        color: white;
+    }
+    .dark-mode select {
+        background-color: #2c2c2c !important; /* Dark gray background */
+        color: white !important; /* White text */
+        border: 1px solid #686c6e; /* Border for visibility */
+    }
+    .dark-mode select option {
+        background-color: #2c2c2c; /* Dark gray background for dropdown items */
+        color: white; /* White text */
+    }
+
+    /* Color Blind Mode */
+    body.colorblind-mode {
+        background-color: #fdf5c9 !important; /* Light yellow */
+        color: #333333 !important; /* Dark gray text for readability */
+    }
+    .colorblind-mode .card {
+        background-color: #fcf1b0 !important;
+        color: #333333;
+        border-color: #d1b600;
+    }
+    .colorblind-mode .modal-content {
+        background-color: #fcf1b0;
+        color: #333333;
+    }
+    .colorblind-mode select {
+        background-color: #f7e89b !important; /* Light golden yellow */
+        color: #333333 !important; /* Dark text for contrast */
+        border: 1px solid #b3b300; /* Slight border for visibility */
+    }
+    .colorblind-mode select option {
+        background-color: #f7e89b;
+        color: #333333;
+    }
+
+    footer {
+        background-color: white !important;
+        color: black !important;
+    }
+
+    /*  Dark Mode */
+    .dark-mode footer {
+        background-color: #2c2c2c !important; /* Dark gray footer */
+        color: #b3b3b3 !important; /* Light gray text */
+        border-top: 1px solid #444; /* Optional: Adds subtle separation */
+    }
+
+    /*  Color Blind Mode */
+    .colorblind-mode footer {
+        background-color: #f7e89b !important; /* Light golden footer */
+        color: #333333 !important; /* Dark text for contrast */
+        border-top: 1px solid #b3b300; /* Optional: Slight border */
+    }
+</style>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const savedMode = localStorage.getItem("accessibilityMode");
+
+        if (savedMode === "dark_mode") {
+            document.body.classList.add("dark-mode");
+            document.body.style.backgroundColor = "black";
+        } else if (savedMode === "colorBlind_mode") {
+            document.body.classList.add("colorblind-mode");
+            document.body.style.backgroundColor = "#fdf5c9"; // Light yellow for colorblind mode
+        }
+    });
+</script>
 <body>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-success ">
@@ -41,5 +125,51 @@
         <p>&copy; 2025 CampusGigs.</p>
     </div>
 </footer>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const applyChangesBtn = document.getElementById("applyChangesBtn");
+        const accessibilitySelect = document.getElementById("AccessibilityType");
+
+        // Load saved preference
+        const savedMode = localStorage.getItem("accessibilityMode");
+        if (savedMode) {
+            applyAccessibilityMode(savedMode);
+            accessibilitySelect.value = savedMode;
+        }
+
+        // Apply mode when button is clicked
+        applyChangesBtn.addEventListener("click", function () {
+            const selectedMode = accessibilitySelect.value;
+            applyAccessibilityMode(selectedMode);
+            localStorage.setItem("accessibilityMode", selectedMode);
+
+            // Close the modal correctly
+            var modalElement = document.getElementById("editProfileModal");
+            var modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if (modalInstance) {
+                modalInstance.hide();
+            } else {
+                new bootstrap.Modal(modalElement).hide();
+            }
+        });
+    });
+
+    // Function to apply selected mode
+    function applyAccessibilityMode(mode) {
+        document.body.classList.remove("dark-mode", "colorblind-mode", "light-mode");
+
+        if (mode === "dark_mode") {
+            document.body.classList.add("dark-mode");
+            document.body.style.backgroundColor = "black";
+        } else if (mode === "colorBlind_mode") {
+            document.body.classList.add("colorblind-mode");
+            document.body.style.backgroundColor = "#fdf5c9"; // Light yellow for colorblind mode
+        } else {
+            document.body.classList.add("light-mode");
+            document.body.style.backgroundColor = ""; // Reset background
+        }
+    }
+</script>
 </body>
 </html>

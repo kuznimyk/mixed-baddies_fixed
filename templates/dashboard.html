@@ -41,30 +41,37 @@
                 </div>
             </div>
             
-            <!-- Edit profile modal -->
+            <!-- Profile Edit Modal -->
             <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
                 <div class="modal-dialog modal-lg">
-                    <div class = "modal-header">
-                    <h5 class="modal-title" id="editProfileModalLabel">Edit Profile</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form id="editProfileForm">
-                    <!--Accessibility features-->
-                    <div class="mb-3">
-                        <label for="AccessibilityType" class="form-label fw-bold">Accessibility Settings</label>
-                        <div class="input-group shadow-sm border rounded bg-white">
-                            <select class="form-select border-0 bg-white" id="AccessibilityType" name="Accessibility_type">
-                                <option value="light_mode">Light Mode (Default)</option>
-                                <option value="dark_mode">Dark Mode</option>
-                                <option value="colorBlind_mode">Color Blind Mode</option>
-                            </select>
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="editProfileModalLabel">Edit Profile</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="editProfileForm">
+                                <!-- Accessibility Features -->
+                                <div class="mb-3">
+                                    <label for="AccessibilityType" class="form-label fw-bold">Accessibility Settings</label>
+                                    <div class="input-group shadow-sm border rounded bg-white">
+                                        <select class="form-select border-0 bg-white" id="AccessibilityType" name="Accessibility_type">
+                                            <option value="light_mode">Light Mode (Default)</option>
+                                            <option value="dark_mode">Dark Mode</option>
+                                            <option value="colorBlind_mode">Color Blind Mode</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                        
+                            <button type="button" class="btn btn-success btn-lg w-100" id="applyChangesBtn">
+                                Apply Changes
+                            </button>
                         </div>
                     </div>
-
-            </form>
-            </div>
-            </div>
+                </div>
             </div>
 
 
