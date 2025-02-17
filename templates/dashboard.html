@@ -149,38 +149,38 @@
                     <h4 class="mb-0">Completed Jobs</h4>
                 </div>
                 <div class="card-body">
-                    <div class="table-responsive completed-jobs" style="max-height: 300px; overflow-y: auto;">
-                        <table class="table table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Job</th>
-                                    <th>Date</th>
-                                    <th>Role</th>
-                                    <th>Amount</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Dog walking</td>
-                                    <td>Jan 25, 2025</td>
-                                    <td>Provider</td>
-                                    <td class="text-success">+$10.00</td>
-                                </tr>
-                                <tr>
-                                    <td>Assignment help</td>
-                                    <td>Jan 20, 2025</td>
-                                    <td>Requester</td>
-                                    <td class="text-danger">-$18.00</td>
-                                </tr>
-                                <tr>
-                                    <td>Package delivery</td>
-                                    <td>Jan 15, 2025</td>
-                                    <td>Provider</td>
-                                    <td class="text-success">+$12.00</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                    {% if completed_jobs %}
+                        <div class="table-responsive completed-jobs" style="max-height: 300px; overflow-y: auto;">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Job</th>
+                                        <th>Date</th>
+                                        <th>Role</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for job in completed_jobs %}
+                                        <tr>
+                                            <td>{{ job.title }}</td>
+                                            <td>{{ job.completion_date }}</td>
+                                            <td>{{ job.role }}</td>
+                                            <td class="{% if job.role == 'Provider' %}text-success{% else %}text-danger{% endif %}">
+                                                {{ '+' if job.role == 'Provider' else '-' }}${{ job.amount }}
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi bi-clipboard-check text-muted" style="font-size: 2rem;"></i>
+                            <p class="text-muted mt-2 mb-0">No jobs completed yet</p>
+                            <small class="text-muted">Your completed jobs will appear here</small>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
         </div>
