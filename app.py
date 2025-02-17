@@ -7,6 +7,8 @@ from bson.objectid import ObjectId
 import datetime
 from functools import wraps
 import os
+from rapidfuzz import process, fuzz
+
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__, static_folder='static', static_url_path='/')
@@ -213,16 +215,47 @@ def inject_user():
 # Public routes
 @app.route("/")
 def home():
-    try:
-        jobs = get_all_jobs()
-        formatted_jobs = [format_job_for_display(job) for job in jobs]
-        return render_template('index.html', jobs=formatted_jobs, logged_in='user_id' in session)
-    except Exception as e:
-        print("Error loading jobs:", str(e))
-        flash("Error loading jobs.", "danger")
-        return render_template('index.html', jobs=[], logged_in='user_id' in session)
+
+        try:
+            jobs = get_all_jobs()
+            formatted_jobs = [format_job_for_display(job) for job in jobs]
+            print(formatted_jobs)
+            return render_template('index.html', jobs=formatted_jobs, logged_in='user_id' in session)
+        except Exception as e:
+            print("Error loading jobs:", str(e))
+            flash("Error loading jobs.", "danger")
+            return render_template('index.html', jobs=[], logged_in='user_id' in session)
 
 
+@app.route("/search", methods=['GET'])
+def search_result():
+    query = request.args.get("query", "").strip()
+    category = request.args.get("category", "").strip()
+
+    print(category)
+    print(query)
+
+
+    if category == "Food Delivery":
+        results = list(mongo.db.food_delivery.find())
+    elif category == "Creative Work":
+        results = list(mongo.db.creative_work.find())
+    elif category == "Academic Help":
+        results = list(mongo.db.academic_help.find())
+    else:
+        results = []
+
+    # print(results)
+    if query:
+        job_titles = [job["job_title"] for job in results]
+
+        best_matches = process.extract(query, job_titles, limit=10, scorer=fuzz.WRatio)
+
+        matched_jobs = [job for job in results if job["job_title"] in [match[0] for match in best_matches]]
+    else:
+        matched_jobs = results
+    print(matched_jobs)
+    return render_template('index.html', jobs=matched_jobs, logged_in='user_id' in session)
 
 # Authentication routes
 @app.route("/signup", methods=["GET", "POST"])
@@ -750,22 +783,22 @@ def format_job_for_display(job):
     # Add type-specific display fields
     if job["job_type"] == "creative_work":
         formatted_job.update({
-            "title": job["job_title"],
-            "description": job["job_description"],
+            "job_title": job["job_title"],
+            "job_description": job["job_description"],
             "location": job.get("location", "Online"),
             "meetup_type": job["meetup_type"]
         })
     elif job["job_type"] == "academic_help":
         formatted_job.update({
-            "title": f"Help needed with {job['subject']}",
-            "description": job["problem_description"],
+            "job_title": f"Help needed with {job['subject']}",
+            "job_description": job["problem_description"],
             "location": job.get("location", "Online"),
             "meetup_type": job["meetup_type"]
         })
     elif job["job_type"] == "food_delivery":
         formatted_job.update({
-            "title": f"Food Delivery from {job['restaurant_name']}",
-            "description": job["order_description"]
+            "job_title": f"Food Delivery from {job['restaurant_name']}",
+            "job_description": job["order_description"]
         })
         
     return formatted_job
