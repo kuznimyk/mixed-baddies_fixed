@@ -119,4 +119,38 @@ main {
   }
 }
 
+/* Dark Mode */
+.dark-mode {
+  background-color: #121212;
+  color: #ffffff;
+}
+
+.dark-mode .card, .dark-mode .modal-content {
+  background-color: #1e1e1e;
+  color: #ffffff;
+  border: 1px solid #333;
+}
+
+.dark-mode .btn-outline-success {
+  color: #ffffff;
+  border-color: #28a745;
+}
+
+.dark-mode .btn-outline-success:hover {
+  background-color: #28a745;
+  color: #ffffff;
+}
+
+/* Color Blind Mode */
+.colorblind-mode {
+  filter: grayscale(100%);
+}
+
+/* Light Mode (Default) */
+.light-mode {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+
 
