@@ -100,26 +100,20 @@
                             <button class="nav-link" id="accepted-tab" data-bs-toggle="tab" data-bs-target="#accepted" type="button" role="tab">Jobs I Accepted</button>
                         </li>
                     </ul>
-                    <div class="tab-content pt-3" id="jobTabsContent">
+                    <div class="tab-content pt-3" id="jobTabsContent" style="max-height: 390px; overflow-y: auto;">
                         <!-- Jobs I Posted Tab -->
                         <div class="tab-pane fade show active" id="posted" role="tabpanel">
                             <div class="list-group">
-                                <a href="#" class="list-group-item list-group-item-action">
-                                    <div class="d-flex w-100 justify-content-between">
-                                        <h5 class="mb-1">Pick up my textbook</h5>
-                                        <span class="badge bg-success">$15.00</span>
-                                    </div>
-                                    <p class="mb-1">Library pickup - Education Building</p>
-                                    <small class="text-muted">Posted yesterday · In Progress</small>
-                                </a>
-                                <a href="#" class="list-group-item list-group-item-action">
-                                    <div class="d-flex w-100 justify-content-between">
-                                        <h5 class="mb-1">Coffee delivery</h5>
-                                        <span class="badge bg-success">$5.00</span>
-                                    </div>
-                                    <p class="mb-1">Starbucks to Science Building</p>
-                                    <small class="text-muted">Posted 3 days ago · Waiting for acceptor</small>
-                                </a>
+                                {% for job in posted_jobs %}
+                                    <a href="#" class="list-group-item list-group-item-action">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <h5 class="mb-1">{{ job["job_title"] }}</h5>
+                                            <span class="badge bg-success">$ {{ job["fee"] }}</span>
+                                        </div>
+                                        <p class="mb-1">{{ job["job_description"] }}</p>
+                                        <small class="text-muted">Posted {{ job["created_at"].strftime('%B %d, %Y %I:%M %p') }} · {{ job["status"] }}</small>
+                                    </a>
+                                {% endfor %}
                             </div>
                             <div class="d-grid mt-3">
                                 <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#postJobModal">Post New Job</button>
@@ -196,7 +190,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="jobPostForm" method="POST" action="{{ url_for('create_new_job') }}">
+                <form id="jobPostForm" method="POST">
                     <!-- Job Type Selection -->
                     <div class="mb-3">
                         <label for="jobType" class="form-label">Job Type</label>
@@ -308,52 +302,52 @@
         // Function to update visible fields based on job type selection
         function updateJobFields() {
             const jobType = document.getElementById("jobType").value;
-    
+
             // Hide all job-specific fields initially
             document.querySelectorAll("#creative_work_fields, #academic_help_fields, #food_delivery_fields").forEach(field => {
                 field.classList.add("d-none");
             });
-    
+
             // Show fields for selected job type
             if (jobType) {
                 document.getElementById(`${jobType}_fields`).classList.remove("d-none");
             }
         }
-    
+
         // Function to toggle location field visibility based on meetup type
         function toggleLocationField(prefix) {
             const meetupType = document.getElementById(`${prefix}_meetup_type`).value;
             const locationField = document.getElementById(`${prefix}_location_field`);
             locationField.style.display = meetupType === "IN_PERSON" ? "block" : "none";
-    
+
             // Clear location value if virtual
             if (meetupType === "VIRTUAL") {
                 document.getElementById(`${prefix}_location`).value = "";
             }
         }
-    
+
         // Event listener for job type selection
         document.getElementById("jobType").addEventListener("change", updateJobFields);
-    
+
         // Event listeners for meetup type changes
         document.querySelectorAll('[id$="_meetup_type"]').forEach(select => {
             select.addEventListener("change", function () {
                 toggleLocationField(this.id.replace("_meetup_type", ""));
             });
         });
-    
+
         // Job Posting - AJAX Form Submission
         document.getElementById("jobPostForm").addEventListener("submit", async function (event) {
             event.preventDefault(); // Prevent default form submission
-    
+
             let formData = new FormData(this);
-    
+
             try {
                 let response = await fetch("{{ url_for('create_new_job') }}", {
                     method: "POST",
                     body: formData
                 });
-    
+
                 if (response.redirected) {
                     window.location.href = response.url;
                 } else {
@@ -371,7 +365,7 @@
                 console.error("Error:", error);
             }
         });
-    
+
         // Function to show alert messages
         function showAlert(type, message) {
             const alertDiv = document.createElement("div");
@@ -381,18 +375,18 @@
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             `;
             document.querySelector(".container").insertBefore(alertDiv, document.querySelector(".container").firstChild);
-    
+
             // Auto-dismiss alert after 3 seconds
             setTimeout(() => {
                 alertDiv.remove();
             }, 3000);
         }
-    
+
         // Profile Image Upload - AJAX Submission
         document.getElementById("profileImageForm")?.addEventListener("submit", async function (event) {
             event.preventDefault();
             let formData = new FormData(this);
-    
+
             try {
                 let response = await fetch("/api/users/me/profile-image", {
                     method: "POST",
@@ -401,7 +395,7 @@
                     },
                     body: formData
                 });
-    
+
                 if (response.ok) {
                     showAlert("success", "Profile picture updated successfully!");
                     $("#updateProfileImageModal").modal("hide");
@@ -413,7 +407,7 @@
                 showAlert("danger", "Failed to update profile picture. Please try again.");
             }
         });
-    
+
         // Initialize Bootstrap tooltips
         var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
         var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -421,59 +415,6 @@
         });
     });
 
-    document.addEventListener("DOMContentLoaded", function () {
-    const jobPostForm = document.getElementById("jobPostForm");
-    
-    if (jobPostForm) {
-        jobPostForm.addEventListener("submit", async function (event) {
-            event.preventDefault();
-            
-            // Debug: Log form data before submission
-            const formData = new FormData(this);
-            console.log("Form Data before submission:");
-            for (let pair of formData.entries()) {
-                console.log(pair[0] + ': ' + pair[1]);
-            }
-            
-            // Get the selected job type and corresponding fee input
-            const jobType = document.getElementById("jobType").value;
-            const feeInput = document.getElementById(`${jobType}_fee`);
-            
-            if (feeInput) {
-                console.log("Fee value:", feeInput.value);
-                console.log("Fee input type:", typeof feeInput.value);
-            }
-            
-            try {
-                const response = await fetch("{{ url_for('create_new_job') }}", {
-                    method: "POST",
-                    body: formData
-                });
-                
-                // Debug: Log the response
-                console.log("Response status:", response.status);
-                
-                if (response.redirected) {
-                    window.location.href = response.url;
-                } else {
-                    const result = await response.json();
-                    console.log("Response data:", result);
-                    
-                    if (result.error) {
-                        showAlert("danger", result.error);
-                    } else {
-                        showAlert("success", "Job posted successfully!");
-                        $('#postJobModal').modal('hide');
-                        setTimeout(() => location.reload(), 1500);
-                    }
-                }
-            } catch (error) {
-                console.error("Error submitting form:", error);
-                showAlert("danger", "Failed to post job. Please try again.");
-            }
-        });
-    }
-});
     </script>
     
 {% endblock %}
