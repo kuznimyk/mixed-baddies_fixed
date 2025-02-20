@@ -113,7 +113,7 @@ def complete_job(job_id, data):
         "job_type": job["job_type"],
         "user_info": job["user_info"],
         "respondent_info": job["respondent_info"],
-        "completion_time": datetime.now(),
+        "completion_time": datetime.datetime.now(),
         "photo_verification": data.get("photo_verification"),
         "user_confirmation": data.get("user_confirmation", False),
         "respondent_confirmation": data.get("respondent_confirmation", False)
@@ -230,7 +230,7 @@ def signup_page():
             "degree": request.form.get("degree", ""),
             "balance": 0.0,
             "role": "user",
-            "created_at": datetime.now()
+            "created_at": datetime.datetime.now()
         }
         
         user_id = mongo.db.users.insert_one(user_data).inserted_id
@@ -238,6 +238,7 @@ def signup_page():
         return redirect(url_for('login_page'))
         
     except Exception as e:
+        print("Error creating user:", str(e))
         flash("An error occurred during registration. Please try again.", "danger")
         return redirect(url_for('signup_page'))
 
@@ -323,7 +324,7 @@ def jobs():
         job_data = {
             "place": data["place"],
             "meet_place": data.get("meet_place", "IN PERSON"),
-            "post_time": datetime.now(),
+            "post_time": datetime.datetime.now(),
             "meet_time": data.get("meet_time"),
             "job_price": float(data.get("job_price", 0)),
             "job_details": data["job_details"],
@@ -438,7 +439,7 @@ def complete_job():
             "job_type": job["job_type"],
             "user_info": job["user_info"],
             "respondent_info": job["respondent_info"],
-            "completion_time": datetime.now(),
+            "completion_time": datetime.datetime.now(),
             "photo_verification": data.get("photo_verification"),
             "user_confirmation": data.get("user_confirmation", False),
             "respondent_confirmation": data.get("respondent_confirmation", False)
@@ -498,7 +499,7 @@ def signup():
         "profile_image": profile_image,
         "balance": 0.0,
         "role": "user",
-        "created_at": datetime.now()
+        "created_at": datetime.datetime.now()
     }
     
     mongo.db.users.insert_one(user_data)
